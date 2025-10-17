@@ -1,6 +1,9 @@
 import { Heart, Truck, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+	const navigate = useNavigate();
+
 	return (
 		<div className="space-y-12">
 			<div className="text-center py-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-3xl text-white">
@@ -12,7 +15,7 @@ export default function Home() {
 					the hungry
 				</p>
 				<button
-					// onClick={() => navigate("register")}
+					onClick={() => navigate("register")}
 					className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100"
 				>
 					Get Started

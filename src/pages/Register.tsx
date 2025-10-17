@@ -11,13 +11,14 @@ export default function Register() {
 		role: "donor",
 	});
 	const [otpSent, setOtpSent] = useState(false);
+	const [otpVerified, setOtpVerified] = useState(false);
 	const [errors, setErrors] = useState<any>({});
+	const [generatedOTP, setGeneratedOTP] = useState("");
 
 	const handleChange = (e: any) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({ ...prev, [name]: value }));
 
-		// Real-time password matching validation
 		if (name === "confirmPassword" || name === "password") {
 			if (name === "confirmPassword" && value !== formData.password) {
 				setErrors((prev: any) => ({
@@ -40,57 +41,71 @@ export default function Register() {
 	};
 
 	const sendOTP = () => {
-		// Mock OTP sending
-		alert(`OTP sent to ${formData.email}: 123456`);
+		if (
+			!formData.email ||
+			!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+		)
+			return alert("Please enter a valid email");
+
+		const otp = "123456"; // Mock OTP
+		setGeneratedOTP(otp);
 		setOtpSent(true);
+		alert(`OTP sent to ${formData.email}: ${otp}`);
+	};
+
+	const verifyOTP = () => {
+		if (formData.otp === generatedOTP) {
+			setOtpVerified(true);
+			alert("OTP Verified!");
+		} else {
+			alert("Invalid OTP");
+		}
 	};
 
 	const handleSubmit = (e: any) => {
 		e.preventDefault();
+		if (!otpVerified) {
+			alert("Please verify your email first!");
+			return;
+		}
 		if (formData.password !== formData.confirmPassword) {
 			setErrors({ confirmPassword: "Passwords do not match" });
 			return;
 		}
 
-		// Mock user creation
-		const newUser: any = {
-			id: Date.now(),
-			...formData,
-			latitude: 0,
-			longitude: 0,
-		};
-		// mockData.users.push(newUser);
+		// Mock registration
 		alert("Registration successful! Please login.");
-		// navigate("login");
 	};
-
 	return (
-		<div className="flex gap-8 items-center">
+		<div className="flex flex-col md:flex-row gap-8 items-center min-h-screen p-6 bg-gray-50">
+			{/* Left Images */}
 			<div className="flex-1">
 				<img
 					src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600"
 					alt="Food donation"
-					className="rounded-2xl shadow-2xl"
+					className="rounded-2xl shadow-2xl mb-6 w-full object-cover"
 				/>
-				<div className="mt-6 grid grid-cols-2 gap-4">
+				<div className="grid grid-cols-2 gap-4">
 					<img
 						src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=300"
 						alt="Volunteers"
-						className="rounded-lg shadow-lg"
+						className="rounded-lg shadow-lg w-full object-cover"
 					/>
 					<img
 						src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=300"
 						alt="Community"
-						className="rounded-lg shadow-lg"
+						className="rounded-lg shadow-lg w-full object-cover"
 					/>
 				</div>
 			</div>
 
+			{/* Right Form */}
 			<div className="flex-1 bg-white p-8 rounded-2xl shadow-xl">
 				<h2 className="text-3xl font-bold text-gray-800 mb-6">
 					Join FoodShare
 				</h2>
 				<form onSubmit={handleSubmit} className="space-y-4">
+					{/* Full Name */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Full Name
@@ -105,12 +120,13 @@ export default function Register() {
 								name="name"
 								value={formData.name}
 								onChange={handleChange}
-								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 								required
 							/>
 						</div>
 					</div>
 
+					{/* Email + OTP */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Email
@@ -126,21 +142,40 @@ export default function Register() {
 									name="email"
 									value={formData.email}
 									onChange={handleChange}
-									className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+									className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 									required
+									disabled={otpSent}
 								/>
 							</div>
 							<button
 								type="button"
-								onClick={sendOTP}
-								className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+								onClick={
+									otpVerified
+										? undefined
+										: otpSent
+										? verifyOTP
+										: sendOTP
+								}
+								disabled={otpVerified}
+								className={`px-4 py-2 rounded-lg font-semibold text-white ${
+									otpVerified
+										? "bg-green-500 cursor-default"
+										: otpSent
+										? "bg-amber-600 hover:bg-amber-700"
+										: "bg-blue-600 hover:bg-blue-700"
+								}`}
 							>
-								Send OTP
+								{otpVerified
+									? "Verified"
+									: otpSent
+									? "Verify OTP"
+									: "Send OTP"}
 							</button>
 						</div>
 					</div>
 
-					{otpSent && (
+					{/* OTP Input */}
+					{otpSent && !otpVerified && (
 						<div>
 							<label className="block text-sm font-medium text-gray-700 mb-2">
 								Enter OTP
@@ -150,13 +185,14 @@ export default function Register() {
 								name="otp"
 								value={formData.otp}
 								onChange={handleChange}
-								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 								placeholder="123456"
 								required
 							/>
 						</div>
 					)}
 
+					{/* Password */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Password
@@ -171,12 +207,13 @@ export default function Register() {
 								name="password"
 								value={formData.password}
 								onChange={handleChange}
-								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 								required
 							/>
 						</div>
 					</div>
 
+					{/* Confirm Password */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Confirm Password
@@ -191,7 +228,7 @@ export default function Register() {
 								name="confirmPassword"
 								value={formData.confirmPassword}
 								onChange={handleChange}
-								className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 ${
+								className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-amber-400 ${
 									errors.confirmPassword
 										? "border-red-500"
 										: "border-gray-300"
@@ -206,6 +243,7 @@ export default function Register() {
 						)}
 					</div>
 
+					{/* Role */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Register as
@@ -214,7 +252,7 @@ export default function Register() {
 							name="role"
 							value={formData.role}
 							onChange={handleChange}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 						>
 							<option value="donor">Donor</option>
 							<option value="ngo">NGO</option>
@@ -222,9 +260,11 @@ export default function Register() {
 						</select>
 					</div>
 
+					{/* Register Button */}
 					<button
 						type="submit"
-						className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold"
+						className="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-semibold"
+						disabled={!otpVerified}
 					>
 						Register
 					</button>
@@ -232,10 +272,7 @@ export default function Register() {
 
 				<p className="text-center mt-4 text-gray-600">
 					Already have an account?{" "}
-					<button
-						// onClick={() => navigate("login")}
-						className="text-green-600 hover:underline"
-					>
+					<button className="text-amber-600 hover:underline">
 						Login here
 					</button>
 				</p>

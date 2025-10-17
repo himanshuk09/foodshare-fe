@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { HeartHandshake } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -10,7 +10,8 @@ export default function Navbar() {
 		<nav className="bg-white shadow-md">
 			<div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
 				<div className="flex items-center gap-2">
-					<Heart className="text-green-600" size={32} />
+					{/* <Heart className="text-green-600" size={32} /> */}
+					<HeartHandshake className="text-green-600" size={32} />
 					<span className="text-2xl font-bold text-green-600">
 						FoodShare
 					</span>

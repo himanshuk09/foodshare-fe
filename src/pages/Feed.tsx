@@ -1,10 +1,74 @@
 import { MapPin, Package, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+const mockData = {
+	users: [
+		{ id: 1, name: "Alice Johnson", role: "Donor" },
+		{
+			id: 2,
+			name: "Helping Hands NGO",
+			role: "NGO",
+			orgName: "Helping Hands",
+		},
+		{ id: 3, name: "Bob Smith", role: "Volunteer" },
+		{ id: 4, name: "Charlie Brown", role: "Donor" },
+		{
+			id: 5,
+			name: "Care & Share NGO",
+			role: "NGO",
+			orgName: "Care & Share",
+		},
+		{ id: 6, name: "Diana Prince", role: "Volunteer" },
+	],
 
+	posts: [
+		{
+			id: 101,
+			donorId: 1,
+			assignedNGO: 2,
+			foodType: "Vegetable Curry",
+			description:
+				"Freshly cooked vegetable curry, enough for 10 people.",
+			quantity: "3 kg",
+			meals: 10,
+			location: "123 Main St, Cityville",
+			status: "pending",
+			image: "https://images.unsplash.com/photo-1604908177526-6d52f8df8d3d?auto=format&fit=crop&w=800&q=80",
+		},
+		{
+			id: 102,
+			donorId: 4,
+			assignedNGO: 5,
+			foodType: "Rice & Lentils",
+			description: "Cooked rice with lentils, vegetarian meals.",
+			quantity: "5 kg",
+			meals: 20,
+			location: "456 Oak Ave, Townsville",
+			status: "assigned",
+			image: "https://images.unsplash.com/photo-1603074609086-3e7e1d4d17a1?auto=format&fit=crop&w=800&q=80",
+		},
+		{
+			id: 103,
+			donorId: 1,
+			assignedNGO: 2,
+			foodType: "Fruit Pack",
+			description: "Assorted fruits, 10 packs.",
+			quantity: "10 packs",
+			meals: 10,
+			location: "123 Main St, Cityville",
+			status: "picked",
+			image: "https://images.unsplash.com/photo-1587049352838-c4a4f3c8c1f7?auto=format&fit=crop&w=800&q=80",
+		},
+	],
+
+	assignments: [
+		{ postId: 101, volunteerId: 3 },
+		{ postId: 102, volunteerId: 6 },
+	],
+};
 export default function Feed() {
-	const posts: any = [];
-	const mockData: any = [];
+	const posts = mockData.posts;
+
 	const navigate = useNavigate();
 	const { logout, user } = useAuth();
 	return (

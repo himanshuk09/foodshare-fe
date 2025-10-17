@@ -1,10 +1,10 @@
 import { Upload } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function AddPost() {
-	const [postData, setPostData] = useState({
+	const [postData, setPostData] = useState<any>({
 		foodType: "",
 		quantity: "",
 		meals: "",
@@ -15,17 +15,67 @@ export default function AddPost() {
 		assignedNGO: "",
 		image: null,
 	});
-	const [previewImage, setPreviewImage] = useState(null);
-	const navigate = useNavigate();
-	const { logout, user } = useAuth();
-	let ngos: any = [];
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
+	const [locationFetched, setLocationFetched] = useState(false);
 
+	const navigate = useNavigate();
+	const { user } = useAuth();
+
+	const ngos = [
+		{ id: 1, name: "Helping Hands NGO", location: "Pune" },
+		{ id: 2, name: "Food Relief Org", location: "Mumbai" },
+		{ id: 3, name: "ShareMeal Foundation", location: "Delhi" },
+	];
+
+	// Fetch current location on mount
+	useEffect(() => {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(
+				async (position) => {
+					const { latitude, longitude } = position.coords;
+					setPostData((prev: any) => ({
+						...prev,
+						latitude,
+						longitude,
+					}));
+
+					// Fetch human-readable address
+					try {
+						const response = await fetch(
+							`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+						);
+						const data = await response.json();
+						const address = data.address;
+						const city =
+							address.city ||
+							address.town ||
+							address.village ||
+							"";
+						const state = address.state || "";
+						const country = address.country || "";
+						setPostData((prev: any) => ({
+							...prev,
+							location: `${city}, ${state}, ${country}`,
+						}));
+						setLocationFetched(true);
+					} catch (err) {
+						console.error("Error fetching location info:", err);
+						setLocationFetched(false);
+					}
+				},
+				(error) => {
+					console.warn("Geolocation error:", error);
+					setLocationFetched(false);
+				}
+			);
+		}
+	}, []);
 	const handleImageUpload = (e: any) => {
 		const file = e.target.files[0];
 		if (file) {
-			const reader: any = new FileReader();
+			const reader = new FileReader();
 			reader.onloadend = () => {
-				setPreviewImage(reader.result);
+				setPreviewImage(reader.result as string);
 				setPostData({ ...postData, image: reader.result });
 			};
 			reader.readAsDataURL(file);
@@ -33,29 +83,30 @@ export default function AddPost() {
 	};
 
 	const handleSubmit = (e: any) => {
-		// e.preventDefault();
-		// const newPost = {
-		// 	id: Date.now(),
-		// 	...postData,
-		// 	donorId: user.id,
-		// 	donorName: user.name,
-		// 	status: "pending",
-		// 	createdAt: new Date().toISOString(),
-		// };
-		// mockData.posts.push(newPost);
-		// alert(
-		// 	"Food donation posted successfully! NGO will be notified via email."
-		// );
-		// navigate("feed");
+		e.preventDefault();
+		if (!postData.latitude || !postData.longitude || !postData.location) {
+			alert("Please provide a location.");
+			return;
+		}
+		const newPost = {
+			id: Date.now(),
+			...postData,
+			donorId: user?.id ?? 1,
+			donorName: user?.name ?? "",
+			status: "pending",
+			createdAt: new Date().toISOString(),
+		};
+		console.log(newPost);
+		alert("Donation posted successfully!");
 	};
 
-	if (user?.role !== "donor") {
-		return (
-			<div className="text-center py-12">
-				Only donors can create posts
-			</div>
-		);
-	}
+	// if (user?.role !== "donor") {
+	// 	return (
+	// 		<div className="text-center py-12">
+	// 			Only donors can create posts
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
@@ -63,11 +114,12 @@ export default function AddPost() {
 				Donate Food
 			</h2>
 			<form onSubmit={handleSubmit} className="space-y-6">
+				{/* Food Image */}
 				<div>
 					<label className="block text-sm font-medium text-gray-700 mb-2">
 						Upload Food Image
 					</label>
-					<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+					<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
 						{previewImage ? (
 							<img
 								src={previewImage}
@@ -95,13 +147,14 @@ export default function AddPost() {
 						/>
 						<label
 							htmlFor="food-image"
-							className="inline-block mt-4 bg-green-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-green-700"
+							className="inline-block mt-4 bg-amber-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-amber-700"
 						>
 							Choose Image
 						</label>
 					</div>
 				</div>
 
+				{/* Food Details */}
 				<div className="grid md:grid-cols-2 gap-6">
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
@@ -117,7 +170,7 @@ export default function AddPost() {
 								})
 							}
 							placeholder="e.g., Cooked meals, Fruits, Vegetables"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
 					</div>
@@ -136,7 +189,7 @@ export default function AddPost() {
 								})
 							}
 							placeholder="e.g., 10 kg, 5 boxes"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
 					</div>
@@ -155,7 +208,7 @@ export default function AddPost() {
 								})
 							}
 							placeholder="Approximate number"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
 					</div>
@@ -172,22 +225,33 @@ export default function AddPost() {
 									assignedNGO: e.target.value,
 								})
 							}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						>
 							<option value="">Select NGO</option>
-							{ngos.map((ngo: any) => (
+							{ngos.map((ngo) => (
 								<option key={ngo.id} value={ngo.id}>
-									{ngo.orgName || ngo.name}
+									{ngo.name}
 								</option>
 							))}
 						</select>
 					</div>
 
+					{/* Location */}
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
 							Pickup Location
 						</label>
+						{locationFetched ? (
+							<p className="text-sm text-green-600 mb-1">
+								Auto-detected location (you can edit if needed)
+							</p>
+						) : (
+							<p className="text-sm text-red-600 mb-1">
+								Unable to detect location. Please enter
+								manually.
+							</p>
+						)}
 						<input
 							type="text"
 							value={postData.location}
@@ -197,8 +261,8 @@ export default function AddPost() {
 									location: e.target.value,
 								})
 							}
-							placeholder="Full address"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							placeholder="Full address or auto-filled location"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
 					</div>
@@ -218,8 +282,9 @@ export default function AddPost() {
 								})
 							}
 							placeholder="21.1458"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
+							disabled={locationFetched}
 						/>
 					</div>
 
@@ -238,8 +303,9 @@ export default function AddPost() {
 								})
 							}
 							placeholder="79.0882"
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
+							disabled={locationFetched}
 						/>
 					</div>
 
@@ -257,7 +323,7 @@ export default function AddPost() {
 							}
 							placeholder="Additional details about the food..."
 							rows={4}
-							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
 					</div>
@@ -265,7 +331,7 @@ export default function AddPost() {
 
 				<button
 					type="submit"
-					className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold"
+					className="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-semibold"
 				>
 					Post Donation
 				</button>
