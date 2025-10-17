@@ -1,18 +1,25 @@
 import { CheckCircle, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { mockData } from "../contant";
 import { useAuth } from "../context/AuthContext";
 
 export default function VolunteerDashboard() {
 	const navigate = useNavigate();
-	const { logout, user } = useAuth();
-	const mockData: any = [];
-	if (user?.role !== "volunteer") {
-		return (
-			<div className="text-center py-12">
-				Only volunteers can access this page
-			</div>
-		);
-	}
+	const { logout } = useAuth();
+	const user = {
+		id: 1,
+		name: "John Doe",
+		email: "john@example.com",
+		role: "donor",
+		location: "Pune",
+	};
+	// if (user?.role !== "volunteer") {
+	// 	return (
+	// 		<div className="text-center py-12">
+	// 			Only volunteers can access this page
+	// 		</div>
+	// 	);
+	// }
 
 	const myAssignments = mockData.assignments.filter(
 		(a: any) => a.volunteerId === user.id
