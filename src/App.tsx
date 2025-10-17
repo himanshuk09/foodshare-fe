@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import NGOList from "./pages/NGOList";
 import NGORequests from "./pages/NGORequest";
+import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
@@ -71,6 +72,7 @@ export default function App() {
 								</ProtectedRoute>
 							}
 						/>
+						<Route path="*" element={<NotFound />} />
 					</Routes>
 				</div>
 			</Router>
