@@ -1,54 +1,134 @@
-import { useEffect, useState } from "react";
+import { MapPin, Package, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Feed() {
-	const [posts, setPosts] = useState<any>([]);
-
-	useEffect(() => {
-		setPosts(JSON.parse(localStorage.getItem("posts") || "[]"));
-	}, []);
-
+	const posts: any = [];
+	const mockData: any = [];
+	const navigate = useNavigate();
+	const { logout, user } = useAuth();
 	return (
-		<div className="max-w-4xl mx-auto">
-			<h2 className="text-2xl font-semibold mb-4 text-center">
-				Donation Feed
+		<div className="space-y-6">
+			<h2 className="text-3xl font-bold text-gray-800">
+				Food Donation Feed
 			</h2>
+
 			{posts.length === 0 ? (
-				<p className="text-center text-gray-500">No donations yet.</p>
+				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+					<Package className="mx-auto text-gray-400 mb-4" size={64} />
+					<p className="text-gray-600 text-lg">
+						No donations posted yet
+					</p>
+					{user?.role === "donor" && (
+						<button
+							onClick={() => navigate("add-post")}
+							className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+						>
+							Post Your First Donation
+						</button>
+					)}
+				</div>
 			) : (
-				posts.map((post: any, i: any) => (
-					<div
-						key={i}
-						className="bg-white p-4 shadow-md mb-4 rounded-lg"
-					>
-						{post.image && (
-							<img
-								src={post.image}
-								className="rounded-lg mb-2 max-h-60 object-cover w-full"
-							/>
-						)}
-						<h3 className="text-xl font-semibold">{post.title}</h3>
-						<p className="text-gray-600">{post.description}</p>
-						<p className="text-sm mt-1">
-							<strong>Donor:</strong> {post.donor} (
-							{post.donorEmail})
-						</p>
-						<p className="text-sm">
-							<strong>NGO:</strong> {post.ngo || "Not assigned"}
-						</p>
-						<p className="text-sm">
-							<strong>Status:</strong>{" "}
-							<span
-								className={`${
-									post.status === "Delivered"
-										? "text-green-600"
-										: "text-yellow-600"
-								}`}
+				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{posts.map((post: any) => {
+						const donor = mockData.users.find(
+							(u: any) => u.id === post.donorId
+						);
+						const ngo = mockData.users.find(
+							(u: any) => u.id === post.assignedNGO
+						);
+						const assignment = mockData.assignments.find(
+							(a: any) => a.postId === post.id
+						);
+						const volunteer = assignment
+							? mockData.users.find(
+									(u: any) => u.id === assignment.volunteerId
+							  )
+							: null;
+
+						return (
+							<div
+								key={post.id}
+								className="bg-white rounded-xl shadow-lg overflow-hidden"
 							>
-								{post.status}
-							</span>
-						</p>
-					</div>
-				))
+								{post.image && (
+									<img
+										src={post.image}
+										alt="Food"
+										className="w-full h-48 object-cover"
+									/>
+								)}
+								<div className="p-4 space-y-2">
+									<h3 className="text-xl font-bold text-gray-800">
+										{post.foodType}
+									</h3>
+									<p className="text-gray-600">
+										{post.description}
+									</p>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<Package size={16} />
+										<span>Quantity: {post.quantity}</span>
+									</div>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<Users size={16} />
+										<span>Meals: {post.meals}</span>
+									</div>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<MapPin size={16} />
+										<span>{post.location}</span>
+									</div>
+
+									<div className="pt-2 border-t">
+										<p className="text-sm text-gray-600">
+											Donor:{" "}
+											<span className="font-semibold">
+												{donor?.name}
+											</span>
+										</p>
+										{ngo && (
+											<p className="text-sm text-gray-600">
+												NGO:{" "}
+												<span className="font-semibold">
+													{ngo.orgName || ngo.name}
+												</span>
+											</p>
+										)}
+										{volunteer && (
+											<p className="text-sm text-gray-600">
+												Volunteer:{" "}
+												<span className="font-semibold">
+													{volunteer.name}
+												</span>
+											</p>
+										)}
+									</div>
+
+									<div className="pt-2">
+										<span
+											className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+												post.status === "pending"
+													? "bg-yellow-100 text-yellow-800"
+													: post.status === "assigned"
+													? "bg-blue-100 text-blue-800"
+													: post.status === "picked"
+													? "bg-purple-100 text-purple-800"
+													: "bg-green-100 text-green-800"
+											}`}
+										>
+											{post.status
+												.charAt(0)
+												.toUpperCase() +
+												post.status.slice(1)}
+										</span>
+									</div>
+								</div>
+							</div>
+						);
+					})}
+				</div>
 			)}
 		</div>
 	);

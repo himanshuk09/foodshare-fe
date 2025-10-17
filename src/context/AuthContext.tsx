@@ -1,22 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-// 🧩 Define user type
-export interface User {
-	name?: string;
-	email: string;
-	password: string;
-	role?: "Donor" | "NGO" | "Volunteer";
-	latitude?: number;
-	longitude?: number;
-	avatar?: string;
-}
-
 // 🧩 Define context shape
 export interface AuthContextType {
-	user: User | null;
+	user: any | null;
 	login: (email: string, password: string) => boolean;
 	logout: () => void;
-	register: (data: User) => void;
+	register: (data: any) => void;
 }
 
 // 🧩 Create the context with default undefined
@@ -24,7 +13,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // 🧩 Provider component
 export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
-	const [user, setUser] = useState<User | null>(null);
+	const [user, setUser] = useState<any | null>(null);
 
 	useEffect(() => {
 		const storedUser = localStorage.getItem("user");
@@ -37,7 +26,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
 		const stored = localStorage.getItem("user");
 		if (!stored) return false;
 
-		const parsed: User = JSON.parse(stored);
+		const parsed: any = JSON.parse(stored);
 		if (parsed.email === email && parsed.password === password) {
 			setUser(parsed);
 			return true;
@@ -50,7 +39,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
 		setUser(null);
 	};
 
-	const register = (data: User): void => {
+	const register = (data: any): void => {
 		localStorage.setItem("user", JSON.stringify(data));
 		setUser(data);
 	};

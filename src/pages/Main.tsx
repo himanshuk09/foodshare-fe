@@ -1,0 +1,1709 @@
+import {
+	Camera,
+	CheckCircle,
+	Heart,
+	Lock,
+	Mail,
+	MapPin,
+	Package,
+	Phone,
+	Truck,
+	Upload,
+	User,
+	Users,
+} from "lucide-react";
+import { useState } from "react";
+
+// Mock data storage (in a real app, this would be a backend)
+const mockData: any = {
+	users: [],
+	posts: [],
+	ngos: [],
+	assignments: [],
+};
+
+// App Component with Routing
+function Main() {
+	const [currentPage, setCurrentPage] = useState("home");
+	const [currentUser, setCurrentUser] = useState<any>(null);
+	const [selectedPost, setSelectedPost] = useState<any>(null);
+
+	const navigate = (page: any, data = null) => {
+		setCurrentPage(page);
+		if (data) setSelectedPost(data);
+	};
+
+	const logout = () => {
+		setCurrentUser(null);
+		setCurrentPage("home");
+	};
+
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+			{/* Navigation */}
+			<nav className="bg-white shadow-md">
+				<div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+					<div className="flex items-center gap-2">
+						<Heart className="text-green-600" size={32} />
+						<span className="text-2xl font-bold text-green-600">
+							FoodShare
+						</span>
+					</div>
+					<div className="flex gap-4">
+						<button
+							onClick={() => navigate("home")}
+							className="text-gray-700 hover:text-green-600"
+						>
+							Home
+						</button>
+						{currentUser ? (
+							<>
+								<button
+									onClick={() => navigate("feed")}
+									className="text-gray-700 hover:text-green-600"
+								>
+									Feed
+								</button>
+								<button
+									onClick={() => navigate("ngo-list")}
+									className="text-gray-700 hover:text-green-600"
+								>
+									NGOs
+								</button>
+								{currentUser.role === "donor" && (
+									<button
+										onClick={() => navigate("add-post")}
+										className="text-gray-700 hover:text-green-600"
+									>
+										Donate
+									</button>
+								)}
+								{currentUser.role === "ngo" && (
+									<button
+										onClick={() =>
+											navigate("ngo-dashboard")
+										}
+										className="text-gray-700 hover:text-green-600"
+									>
+										Dashboard
+									</button>
+								)}
+								{currentUser.role === "volunteer" && (
+									<button
+										onClick={() =>
+											navigate("volunteer-tasks")
+										}
+										className="text-gray-700 hover:text-green-600"
+									>
+										My Tasks
+									</button>
+								)}
+								<button
+									onClick={() => navigate("profile")}
+									className="text-gray-700 hover:text-green-600"
+								>
+									Profile
+								</button>
+								<button
+									onClick={logout}
+									className="text-red-600 hover:text-red-700"
+								>
+									Logout
+								</button>
+							</>
+						) : (
+							<>
+								<button
+									onClick={() => navigate("login")}
+									className="text-gray-700 hover:text-green-600"
+								>
+									Login
+								</button>
+								<button
+									onClick={() => navigate("register")}
+									className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+								>
+									Register
+								</button>
+							</>
+						)}
+					</div>
+				</div>
+			</nav>
+
+			{/* Page Content */}
+			<div className="max-w-7xl mx-auto px-4 py-8">
+				{currentPage === "home" && <HomePage navigate={navigate} />}
+				{currentPage === "register" && (
+					<RegisterScreen navigate={navigate} />
+				)}
+				{currentPage === "login" && (
+					<LoginScreen
+						navigate={navigate}
+						setCurrentUser={setCurrentUser}
+					/>
+				)}
+				{currentPage === "profile" && (
+					<ProfileScreen
+						currentUser={currentUser}
+						setCurrentUser={setCurrentUser}
+					/>
+				)}
+				{currentPage === "add-post" && (
+					<AddPostScreen
+						currentUser={currentUser}
+						navigate={navigate}
+					/>
+				)}
+				{currentPage === "feed" && (
+					<FeedScreen currentUser={currentUser} navigate={navigate} />
+				)}
+				{currentPage === "ngo-list" && <NGOListScreen />}
+				{currentPage === "ngo-dashboard" && (
+					<NGODashboard
+						currentUser={currentUser}
+						navigate={navigate}
+					/>
+				)}
+				{currentPage === "volunteer-tasks" && (
+					<VolunteerTasks currentUser={currentUser} />
+				)}
+			</div>
+		</div>
+	);
+}
+
+// 1. Register Screen
+function RegisterScreen({ navigate }: any) {
+	const [formData, setFormData] = useState({
+		name: "",
+		email: "",
+		otp: "",
+		password: "",
+		confirmPassword: "",
+		role: "donor",
+	});
+	const [otpSent, setOtpSent] = useState(false);
+	const [errors, setErrors] = useState<any>({});
+
+	const handleChange = (e: any) => {
+		const { name, value } = e.target;
+		setFormData((prev) => ({ ...prev, [name]: value }));
+
+		// Real-time password matching validation
+		if (name === "confirmPassword" || name === "password") {
+			if (name === "confirmPassword" && value !== formData.password) {
+				setErrors((prev: any) => ({
+					...prev,
+					confirmPassword: "Passwords do not match",
+				}));
+			} else if (
+				name === "password" &&
+				formData.confirmPassword &&
+				value !== formData.confirmPassword
+			) {
+				setErrors((prev: any) => ({
+					...prev,
+					confirmPassword: "Passwords do not match",
+				}));
+			} else {
+				setErrors((prev: any) => ({ ...prev, confirmPassword: "" }));
+			}
+		}
+	};
+
+	const sendOTP = () => {
+		// Mock OTP sending
+		alert(`OTP sent to ${formData.email}: 123456`);
+		setOtpSent(true);
+	};
+
+	const handleSubmit = (e: any) => {
+		e.preventDefault();
+		if (formData.password !== formData.confirmPassword) {
+			setErrors({ confirmPassword: "Passwords do not match" });
+			return;
+		}
+
+		// Mock user creation
+		const newUser: any = {
+			id: Date.now(),
+			...formData,
+			latitude: 0,
+			longitude: 0,
+		};
+		mockData.users.push(newUser);
+		alert("Registration successful! Please login.");
+		navigate("login");
+	};
+
+	return (
+		<div className="flex gap-8 items-center">
+			<div className="flex-1">
+				<img
+					src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=600"
+					alt="Food donation"
+					className="rounded-2xl shadow-2xl"
+				/>
+				<div className="mt-6 grid grid-cols-2 gap-4">
+					<img
+						src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=300"
+						alt="Volunteers"
+						className="rounded-lg shadow-lg"
+					/>
+					<img
+						src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=300"
+						alt="Community"
+						className="rounded-lg shadow-lg"
+					/>
+				</div>
+			</div>
+
+			<div className="flex-1 bg-white p-8 rounded-2xl shadow-xl">
+				<h2 className="text-3xl font-bold text-gray-800 mb-6">
+					Join FoodShare
+				</h2>
+				<form onSubmit={handleSubmit} className="space-y-4">
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Full Name
+						</label>
+						<div className="relative">
+							<User
+								className="absolute left-3 top-3 text-gray-400"
+								size={20}
+							/>
+							<input
+								type="text"
+								name="name"
+								value={formData.name}
+								onChange={handleChange}
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								required
+							/>
+						</div>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Email
+						</label>
+						<div className="relative flex gap-2">
+							<div className="relative flex-1">
+								<Mail
+									className="absolute left-3 top-3 text-gray-400"
+									size={20}
+								/>
+								<input
+									type="email"
+									name="email"
+									value={formData.email}
+									onChange={handleChange}
+									className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+									required
+								/>
+							</div>
+							<button
+								type="button"
+								onClick={sendOTP}
+								className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+							>
+								Send OTP
+							</button>
+						</div>
+					</div>
+
+					{otpSent && (
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Enter OTP
+							</label>
+							<input
+								type="text"
+								name="otp"
+								value={formData.otp}
+								onChange={handleChange}
+								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								placeholder="123456"
+								required
+							/>
+						</div>
+					)}
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Password
+						</label>
+						<div className="relative">
+							<Lock
+								className="absolute left-3 top-3 text-gray-400"
+								size={20}
+							/>
+							<input
+								type="password"
+								name="password"
+								value={formData.password}
+								onChange={handleChange}
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								required
+							/>
+						</div>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Confirm Password
+						</label>
+						<div className="relative">
+							<Lock
+								className="absolute left-3 top-3 text-gray-400"
+								size={20}
+							/>
+							<input
+								type="password"
+								name="confirmPassword"
+								value={formData.confirmPassword}
+								onChange={handleChange}
+								className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 ${
+									errors.confirmPassword
+										? "border-red-500"
+										: "border-gray-300"
+								}`}
+								required
+							/>
+						</div>
+						{errors.confirmPassword && (
+							<p className="text-red-500 text-sm mt-1">
+								{errors.confirmPassword}
+							</p>
+						)}
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Register as
+						</label>
+						<select
+							name="role"
+							value={formData.role}
+							onChange={handleChange}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+						>
+							<option value="donor">Donor</option>
+							<option value="ngo">NGO</option>
+							<option value="volunteer">Volunteer</option>
+						</select>
+					</div>
+
+					<button
+						type="submit"
+						className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold"
+					>
+						Register
+					</button>
+				</form>
+
+				<p className="text-center mt-4 text-gray-600">
+					Already have an account?{" "}
+					<button
+						onClick={() => navigate("login")}
+						className="text-green-600 hover:underline"
+					>
+						Login here
+					</button>
+				</p>
+			</div>
+		</div>
+	);
+}
+
+// 2. Login Screen
+function LoginScreen({ navigate, setCurrentUser }: any) {
+	const [credentials, setCredentials] = useState({ email: "", password: "" });
+
+	const handleSubmit = (e: any) => {
+		e.preventDefault();
+		// Mock login
+		const user = mockData.users.find(
+			(u: any) => u.email === credentials.email
+		);
+		if (user) {
+			setCurrentUser(user);
+			navigate("home");
+		} else {
+			alert("Invalid credentials");
+		}
+	};
+
+	return (
+		<div className="flex gap-8 items-center">
+			<div className="flex-1">
+				<img
+					src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600"
+					alt="Community help"
+					className="rounded-2xl shadow-2xl"
+				/>
+			</div>
+
+			<div className="flex-1 bg-white p-8 rounded-2xl shadow-xl">
+				<h2 className="text-3xl font-bold text-gray-800 mb-6">
+					Welcome Back
+				</h2>
+				<form onSubmit={handleSubmit} className="space-y-4">
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Email
+						</label>
+						<div className="relative">
+							<Mail
+								className="absolute left-3 top-3 text-gray-400"
+								size={20}
+							/>
+							<input
+								type="email"
+								value={credentials.email}
+								onChange={(e) =>
+									setCredentials({
+										...credentials,
+										email: e.target.value,
+									})
+								}
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								required
+							/>
+						</div>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Password
+						</label>
+						<div className="relative">
+							<Lock
+								className="absolute left-3 top-3 text-gray-400"
+								size={20}
+							/>
+							<input
+								type="password"
+								value={credentials.password}
+								onChange={(e) =>
+									setCredentials({
+										...credentials,
+										password: e.target.value,
+									})
+								}
+								className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								required
+							/>
+						</div>
+					</div>
+
+					<button
+						type="submit"
+						className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold"
+					>
+						Login
+					</button>
+				</form>
+
+				<p className="text-center mt-4 text-gray-600">
+					Don't have an account?{" "}
+					<button
+						onClick={() => navigate("register")}
+						className="text-green-600 hover:underline"
+					>
+						Register here
+					</button>
+				</p>
+			</div>
+		</div>
+	);
+}
+
+// 3. Home Page
+function HomePage({ navigate }: any) {
+	return (
+		<div className="space-y-12">
+			<div className="text-center py-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-3xl text-white">
+				<h1 className="text-5xl font-bold mb-4">
+					Share Food, Share Hope
+				</h1>
+				<p className="text-xl mb-8">
+					Connect donors with NGOs to eliminate food waste and feed
+					the hungry
+				</p>
+				<button
+					onClick={() => navigate("register")}
+					className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100"
+				>
+					Get Started
+				</button>
+			</div>
+
+			<div className="grid md:grid-cols-3 gap-8">
+				<div className="bg-white p-6 rounded-xl shadow-lg">
+					<Users className="text-green-600 mb-4" size={48} />
+					<h3 className="text-2xl font-bold mb-2">For Donors</h3>
+					<p className="text-gray-600">
+						Share your extra food with those in need. Every meal
+						counts in fighting hunger.
+					</p>
+				</div>
+				<div className="bg-white p-6 rounded-xl shadow-lg">
+					<Heart className="text-blue-600 mb-4" size={48} />
+					<h3 className="text-2xl font-bold mb-2">For NGOs</h3>
+					<p className="text-gray-600">
+						Receive food donations and coordinate with volunteers
+						for efficient distribution.
+					</p>
+				</div>
+				<div className="bg-white p-6 rounded-xl shadow-lg">
+					<Truck className="text-purple-600 mb-4" size={48} />
+					<h3 className="text-2xl font-bold mb-2">For Volunteers</h3>
+					<p className="text-gray-600">
+						Be the bridge between donors and NGOs. Help deliver hope
+						to communities.
+					</p>
+				</div>
+			</div>
+
+			<div className="grid md:grid-cols-2 gap-8">
+				<img
+					src="https://images.unsplash.com/photo-1593113598332-cd288d649433?w=500"
+					alt="Food donation"
+					className="rounded-xl shadow-lg"
+				/>
+				<div className="flex flex-col justify-center">
+					<h2 className="text-3xl font-bold mb-4">Our Mission</h2>
+					<p className="text-gray-700 mb-4">
+						FoodShare connects individuals and businesses with
+						surplus food to NGOs and communities in need. We believe
+						that no food should go to waste when there are people
+						who need it.
+					</p>
+					<p className="text-gray-700">
+						Our platform makes it easy to donate, coordinate pickups
+						through volunteers, and track the impact of your
+						contributions. Together, we can build a world without
+						hunger.
+					</p>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// 4. Profile Screen
+function ProfileScreen({ currentUser, setCurrentUser }: any) {
+	const [editing, setEditing] = useState(false);
+	const [profile, setProfile] = useState(currentUser || {});
+	const [previewImage, setPreviewImage] = useState<any>(null);
+
+	const handleImageUpload = (e: any) => {
+		const file = e.target.files[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setPreviewImage(reader.result);
+				setProfile({ ...profile, profileImage: reader.result });
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
+	const handleSave = () => {
+		setCurrentUser(profile);
+		const userIndex = mockData.users.findIndex(
+			(u: any) => u.id === profile.id
+		);
+		if (userIndex !== -1) {
+			mockData.users[userIndex] = profile;
+		}
+		setEditing(false);
+		alert("Profile updated successfully!");
+	};
+
+	if (!currentUser) {
+		return (
+			<div className="text-center py-12">
+				Please login to view profile
+			</div>
+		);
+	}
+
+	return (
+		<div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+			<div className="flex justify-between items-center mb-6">
+				<h2 className="text-3xl font-bold text-gray-800">Profile</h2>
+				<button
+					onClick={() => (editing ? handleSave() : setEditing(true))}
+					className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+				>
+					{editing ? "Save Changes" : "Edit Profile"}
+				</button>
+			</div>
+
+			<div className="space-y-6">
+				<div className="flex items-center gap-6">
+					<div className="relative">
+						<div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+							{previewImage || profile.profileImage ? (
+								<img
+									src={previewImage || profile.profileImage}
+									alt="Profile"
+									className="w-full h-full object-cover"
+								/>
+							) : (
+								<User size={64} className="text-gray-400" />
+							)}
+						</div>
+						{editing && (
+							<label className="absolute bottom-0 right-0 bg-green-600 p-2 rounded-full cursor-pointer hover:bg-green-700">
+								<Camera size={20} className="text-white" />
+								<input
+									type="file"
+									accept="image/*"
+									onChange={handleImageUpload}
+									className="hidden"
+								/>
+							</label>
+						)}
+					</div>
+					<div>
+						<h3 className="text-2xl font-bold">{profile.name}</h3>
+						<p className="text-gray-600 capitalize">
+							{profile.role}
+						</p>
+					</div>
+				</div>
+
+				<div className="grid md:grid-cols-2 gap-6">
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Name
+						</label>
+						<input
+							type="text"
+							value={profile.name}
+							onChange={(e) =>
+								setProfile({ ...profile, name: e.target.value })
+							}
+							disabled={!editing}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Email
+						</label>
+						<input
+							type="email"
+							value={profile.email}
+							onChange={(e) =>
+								setProfile({
+									...profile,
+									email: e.target.value,
+								})
+							}
+							disabled={!editing}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Phone
+						</label>
+						<input
+							type="tel"
+							value={profile.phone || ""}
+							onChange={(e) =>
+								setProfile({
+									...profile,
+									phone: e.target.value,
+								})
+							}
+							disabled={!editing}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Location
+						</label>
+						<input
+							type="text"
+							value={profile.location || ""}
+							onChange={(e) =>
+								setProfile({
+									...profile,
+									location: e.target.value,
+								})
+							}
+							disabled={!editing}
+							placeholder="City, State"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Latitude
+						</label>
+						<input
+							type="number"
+							step="any"
+							value={profile.latitude || ""}
+							onChange={(e) =>
+								setProfile({
+									...profile,
+									latitude: parseFloat(e.target.value),
+								})
+							}
+							disabled={!editing}
+							placeholder="21.1458"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Longitude
+						</label>
+						<input
+							type="number"
+							step="any"
+							value={profile.longitude || ""}
+							onChange={(e) =>
+								setProfile({
+									...profile,
+									longitude: parseFloat(e.target.value),
+								})
+							}
+							disabled={!editing}
+							placeholder="79.0882"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+						/>
+					</div>
+
+					{profile.role === "ngo" && (
+						<>
+							<div className="md:col-span-2">
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									Organization Name
+								</label>
+								<input
+									type="text"
+									value={profile.orgName || ""}
+									onChange={(e) =>
+										setProfile({
+											...profile,
+											orgName: e.target.value,
+										})
+									}
+									disabled={!editing}
+									className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+								/>
+							</div>
+							<div className="md:col-span-2">
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									About Organization
+								</label>
+								<textarea
+									value={profile.about || ""}
+									onChange={(e) =>
+										setProfile({
+											...profile,
+											about: e.target.value,
+										})
+									}
+									disabled={!editing}
+									rows={4}
+									className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+								/>
+							</div>
+						</>
+					)}
+
+					{profile.role === "volunteer" && (
+						<div className="md:col-span-2">
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Availability
+							</label>
+							<input
+								type="text"
+								value={profile.availability || ""}
+								onChange={(e) =>
+									setProfile({
+										...profile,
+										availability: e.target.value,
+									})
+								}
+								disabled={!editing}
+								placeholder="e.g., Weekends, Evenings"
+								className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+							/>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// 5. Add Post for Donor
+function AddPostScreen({ currentUser, navigate }: any) {
+	const [postData, setPostData] = useState({
+		foodType: "",
+		quantity: "",
+		meals: "",
+		description: "",
+		location: "",
+		latitude: "",
+		longitude: "",
+		assignedNGO: "",
+		image: null,
+	});
+	const [previewImage, setPreviewImage] = useState(null);
+
+	const ngos = mockData.users.filter((u: any) => u.role === "ngo");
+
+	const handleImageUpload = (e: any) => {
+		const file = e.target.files[0];
+		if (file) {
+			const reader: any = new FileReader();
+			reader.onloadend = () => {
+				setPreviewImage(reader.result);
+				setPostData({ ...postData, image: reader.result });
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
+	const handleSubmit = (e: any) => {
+		e.preventDefault();
+		const newPost = {
+			id: Date.now(),
+			...postData,
+			donorId: currentUser.id,
+			donorName: currentUser.name,
+			status: "pending",
+			createdAt: new Date().toISOString(),
+		};
+		mockData.posts.push(newPost);
+		alert(
+			"Food donation posted successfully! NGO will be notified via email."
+		);
+		navigate("feed");
+	};
+
+	if (currentUser?.role !== "donor") {
+		return (
+			<div className="text-center py-12">
+				Only donors can create posts
+			</div>
+		);
+	}
+
+	return (
+		<div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+			<h2 className="text-3xl font-bold text-gray-800 mb-6">
+				Donate Food
+			</h2>
+			<form onSubmit={handleSubmit} className="space-y-6">
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-2">
+						Upload Food Image
+					</label>
+					<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+						{previewImage ? (
+							<img
+								src={previewImage}
+								alt="Preview"
+								className="max-h-64 mx-auto rounded-lg"
+							/>
+						) : (
+							<div className="space-y-2">
+								<Upload
+									className="mx-auto text-gray-400"
+									size={48}
+								/>
+								<p className="text-gray-600">
+									Click to upload food image
+								</p>
+							</div>
+						)}
+						<input
+							type="file"
+							accept="image/*"
+							onChange={handleImageUpload}
+							className="hidden"
+							id="food-image"
+							required
+						/>
+						<label
+							htmlFor="food-image"
+							className="inline-block mt-4 bg-green-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-green-700"
+						>
+							Choose Image
+						</label>
+					</div>
+				</div>
+
+				<div className="grid md:grid-cols-2 gap-6">
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Food Type
+						</label>
+						<input
+							type="text"
+							value={postData.foodType}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									foodType: e.target.value,
+								})
+							}
+							placeholder="e.g., Cooked meals, Fruits, Vegetables"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Quantity
+						</label>
+						<input
+							type="text"
+							value={postData.quantity}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									quantity: e.target.value,
+								})
+							}
+							placeholder="e.g., 10 kg, 5 boxes"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Number of Meals
+						</label>
+						<input
+							type="number"
+							value={postData.meals}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									meals: e.target.value,
+								})
+							}
+							placeholder="Approximate number"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Assign to NGO
+						</label>
+						<select
+							value={postData.assignedNGO}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									assignedNGO: e.target.value,
+								})
+							}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						>
+							<option value="">Select NGO</option>
+							{ngos.map((ngo: any) => (
+								<option key={ngo.id} value={ngo.id}>
+									{ngo.orgName || ngo.name}
+								</option>
+							))}
+						</select>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Pickup Location
+						</label>
+						<input
+							type="text"
+							value={postData.location}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									location: e.target.value,
+								})
+							}
+							placeholder="Full address"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Latitude
+						</label>
+						<input
+							type="number"
+							step="any"
+							value={postData.latitude}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									latitude: e.target.value,
+								})
+							}
+							placeholder="21.1458"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Longitude
+						</label>
+						<input
+							type="number"
+							step="any"
+							value={postData.longitude}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									longitude: e.target.value,
+								})
+							}
+							placeholder="79.0882"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+
+					<div className="md:col-span-2">
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Description
+						</label>
+						<textarea
+							value={postData.description}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									description: e.target.value,
+								})
+							}
+							placeholder="Additional details about the food..."
+							rows={4}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+							required
+						/>
+					</div>
+				</div>
+
+				<button
+					type="submit"
+					className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-semibold"
+				>
+					Post Donation
+				</button>
+			</form>
+		</div>
+	);
+}
+
+// 6. Feed Screen
+function FeedScreen({ currentUser, navigate }: any) {
+	const posts = mockData.posts;
+
+	return (
+		<div className="space-y-6">
+			<h2 className="text-3xl font-bold text-gray-800">
+				Food Donation Feed
+			</h2>
+
+			{posts.length === 0 ? (
+				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+					<Package className="mx-auto text-gray-400 mb-4" size={64} />
+					<p className="text-gray-600 text-lg">
+						No donations posted yet
+					</p>
+					{currentUser?.role === "donor" && (
+						<button
+							onClick={() => navigate("add-post")}
+							className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+						>
+							Post Your First Donation
+						</button>
+					)}
+				</div>
+			) : (
+				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{posts.map((post: any) => {
+						const donor = mockData.users.find(
+							(u: any) => u.id === post.donorId
+						);
+						const ngo = mockData.users.find(
+							(u: any) => u.id === post.assignedNGO
+						);
+						const assignment = mockData.assignments.find(
+							(a: any) => a.postId === post.id
+						);
+						const volunteer = assignment
+							? mockData.users.find(
+									(u: any) => u.id === assignment.volunteerId
+							  )
+							: null;
+
+						return (
+							<div
+								key={post.id}
+								className="bg-white rounded-xl shadow-lg overflow-hidden"
+							>
+								{post.image && (
+									<img
+										src={post.image}
+										alt="Food"
+										className="w-full h-48 object-cover"
+									/>
+								)}
+								<div className="p-4 space-y-2">
+									<h3 className="text-xl font-bold text-gray-800">
+										{post.foodType}
+									</h3>
+									<p className="text-gray-600">
+										{post.description}
+									</p>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<Package size={16} />
+										<span>Quantity: {post.quantity}</span>
+									</div>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<Users size={16} />
+										<span>Meals: {post.meals}</span>
+									</div>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<MapPin size={16} />
+										<span>{post.location}</span>
+									</div>
+
+									<div className="pt-2 border-t">
+										<p className="text-sm text-gray-600">
+											Donor:{" "}
+											<span className="font-semibold">
+												{donor?.name}
+											</span>
+										</p>
+										{ngo && (
+											<p className="text-sm text-gray-600">
+												NGO:{" "}
+												<span className="font-semibold">
+													{ngo.orgName || ngo.name}
+												</span>
+											</p>
+										)}
+										{volunteer && (
+											<p className="text-sm text-gray-600">
+												Volunteer:{" "}
+												<span className="font-semibold">
+													{volunteer.name}
+												</span>
+											</p>
+										)}
+									</div>
+
+									<div className="pt-2">
+										<span
+											className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+												post.status === "pending"
+													? "bg-yellow-100 text-yellow-800"
+													: post.status === "assigned"
+													? "bg-blue-100 text-blue-800"
+													: post.status === "picked"
+													? "bg-purple-100 text-purple-800"
+													: "bg-green-100 text-green-800"
+											}`}
+										>
+											{post.status
+												.charAt(0)
+												.toUpperCase() +
+												post.status.slice(1)}
+										</span>
+									</div>
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			)}
+		</div>
+	);
+}
+
+// 7. NGO List Screen
+function NGOListScreen() {
+	const ngos = mockData.users.filter((u: any) => u.role === "ngo");
+
+	return (
+		<div className="space-y-6">
+			<h2 className="text-3xl font-bold text-gray-800">
+				Registered NGOs
+			</h2>
+
+			{ngos.length === 0 ? (
+				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+					<Users className="mx-auto text-gray-400 mb-4" size={64} />
+					<p className="text-gray-600 text-lg">
+						No NGOs registered yet
+					</p>
+				</div>
+			) : (
+				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{ngos.map((ngo: any) => (
+						<div
+							key={ngo.id}
+							className="bg-white rounded-xl shadow-lg p-6 space-y-4"
+						>
+							<div className="flex items-center gap-4">
+								<div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+									{ngo.profileImage ? (
+										<img
+											src={ngo.profileImage}
+											alt={ngo.name}
+											className="w-full h-full object-cover rounded-full"
+										/>
+									) : (
+										<Heart
+											className="text-green-600"
+											size={32}
+										/>
+									)}
+								</div>
+								<div>
+									<h3 className="text-xl font-bold text-gray-800">
+										{ngo.orgName || ngo.name}
+									</h3>
+									<p className="text-sm text-gray-600">
+										{ngo.location || "Location not set"}
+									</p>
+								</div>
+							</div>
+
+							{ngo.about && (
+								<p className="text-gray-600 text-sm">
+									{ngo.about}
+								</p>
+							)}
+
+							<div className="flex items-center gap-2 text-sm text-gray-600">
+								<Mail size={16} />
+								<span>{ngo.email}</span>
+							</div>
+
+							{ngo.phone && (
+								<div className="flex items-center gap-2 text-sm text-gray-600">
+									<Phone size={16} />
+									<span>{ngo.phone}</span>
+								</div>
+							)}
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
+// 8. NGO Dashboard
+function NGODashboard({ currentUser, navigate }: any) {
+	const [selectedPost, setSelectedPost] = useState<any>(null);
+	const [selectedVolunteer, setSelectedVolunteer] = useState("");
+
+	if (currentUser?.role !== "ngo") {
+		return (
+			<div className="text-center py-12">
+				Only NGOs can access this dashboard
+			</div>
+		);
+	}
+
+	const assignedPosts = mockData.posts.filter(
+		(p: any) => p.assignedNGO === currentUser.id
+	);
+	const volunteers = mockData.users.filter(
+		(u: any) => u.role === "volunteer"
+	);
+
+	const assignVolunteer = () => {
+		if (!selectedPost || !selectedVolunteer) {
+			alert("Please select both post and volunteer");
+			return;
+		}
+
+		const assignment: any = {
+			id: Date.now(),
+			postId: selectedPost.id,
+			volunteerId: parseInt(selectedVolunteer),
+			status: "assigned",
+			assignedAt: new Date().toISOString(),
+		};
+
+		mockData.assignments.push(assignment);
+
+		const postIndex = mockData.posts.findIndex(
+			(p: any) => p.id === selectedPost.id
+		);
+		if (postIndex !== -1) {
+			mockData.posts[postIndex].status = "assigned";
+		}
+
+		alert("Volunteer assigned successfully! Email notification sent.");
+		setSelectedPost(null);
+		setSelectedVolunteer("");
+	};
+
+	return (
+		<div className="space-y-6">
+			<h2 className="text-3xl font-bold text-gray-800">NGO Dashboard</h2>
+
+			{assignedPosts.length === 0 ? (
+				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+					<Package className="mx-auto text-gray-400 mb-4" size={64} />
+					<p className="text-gray-600 text-lg">
+						No donations assigned yet
+					</p>
+				</div>
+			) : (
+				<div className="grid md:grid-cols-2 gap-6">
+					{assignedPosts.map((post: any) => {
+						const donor = mockData.users.find(
+							(u: any) => u.id === post.donorId
+						);
+						const assignment = mockData.assignments.find(
+							(a: any) => a.postId === post.id
+						);
+						const volunteer = assignment
+							? mockData.users.find(
+									(u: any) => u.id === assignment.volunteerId
+							  )
+							: null;
+
+						return (
+							<div
+								key={post.id}
+								className="bg-white rounded-xl shadow-lg p-6 space-y-4"
+							>
+								{post.image && (
+									<img
+										src={post.image}
+										alt="Food"
+										className="w-full h-48 object-cover rounded-lg"
+									/>
+								)}
+
+								<h3 className="text-xl font-bold text-gray-800">
+									{post.foodType}
+								</h3>
+								<p className="text-gray-600">
+									{post.description}
+								</p>
+
+								<div className="space-y-2">
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<Package size={16} />
+										<span>
+											Quantity: {post.quantity} | Meals:{" "}
+											{post.meals}
+										</span>
+									</div>
+
+									<div className="flex items-center gap-2 text-sm text-gray-600">
+										<MapPin size={16} />
+										<span>{post.location}</span>
+									</div>
+
+									<p className="text-sm text-gray-600">
+										Donor:{" "}
+										<span className="font-semibold">
+											{donor?.name}
+										</span>
+									</p>
+									<p className="text-sm text-gray-600">
+										Email:{" "}
+										<span className="font-semibold">
+											{donor?.email}
+										</span>
+									</p>
+								</div>
+
+								{volunteer ? (
+									<div className="bg-blue-50 p-4 rounded-lg">
+										<p className="text-sm font-semibold text-blue-800">
+											Assigned to: {volunteer.name}
+										</p>
+										<p className="text-sm text-blue-600">
+											{volunteer.email}
+										</p>
+										<p className="text-sm text-blue-600">
+											Status: {post.status}
+										</p>
+									</div>
+								) : (
+									<div className="space-y-3">
+										<button
+											onClick={() =>
+												setSelectedPost(post)
+											}
+											className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+										>
+											Assign Volunteer
+										</button>
+									</div>
+								)}
+							</div>
+						);
+					})}
+				</div>
+			)}
+
+			{selectedPost && (
+				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+					<div className="bg-white rounded-2xl p-8 max-w-md w-full">
+						<h3 className="text-2xl font-bold text-gray-800 mb-4">
+							Assign Volunteer
+						</h3>
+						<p className="text-gray-600 mb-4">
+							Donation: {selectedPost.foodType}
+						</p>
+
+						<div className="space-y-4">
+							<div>
+								<label className="block text-sm font-medium text-gray-700 mb-2">
+									Select Volunteer
+								</label>
+								<select
+									value={selectedVolunteer}
+									onChange={(e) =>
+										setSelectedVolunteer(e.target.value)
+									}
+									className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+								>
+									<option value="">Choose a volunteer</option>
+									{volunteers.map((vol: any) => (
+										<option key={vol.id} value={vol.id}>
+											{vol.name} -{" "}
+											{vol.location || "Location not set"}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<div className="flex gap-3">
+								<button
+									onClick={assignVolunteer}
+									className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+								>
+									Assign
+								</button>
+								<button
+									onClick={() => setSelectedPost(null)}
+									className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+								>
+									Cancel
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
+// 9. Volunteer Tasks
+function VolunteerTasks({ currentUser }: any) {
+	if (currentUser?.role !== "volunteer") {
+		return (
+			<div className="text-center py-12">
+				Only volunteers can access this page
+			</div>
+		);
+	}
+
+	const myAssignments = mockData.assignments.filter(
+		(a: any) => a.volunteerId === currentUser.id
+	);
+
+	const updateStatus = (assignmentId: any, newStatus: any) => {
+		const assignmentIndex = mockData.assignments.findIndex(
+			(a: any) => a.id === assignmentId
+		);
+		if (assignmentIndex !== -1) {
+			mockData.assignments[assignmentIndex].status = newStatus;
+
+			const assignment = mockData.assignments[assignmentIndex];
+			const postIndex = mockData.posts.findIndex(
+				(p: any) => p.id === assignment.postId
+			);
+			if (postIndex !== -1) {
+				mockData.posts[postIndex].status = newStatus;
+			}
+
+			alert(`Status updated to: ${newStatus}. Email notification sent.`);
+		}
+	};
+
+	return (
+		<div className="space-y-6">
+			<h2 className="text-3xl font-bold text-gray-800">My Tasks</h2>
+
+			{myAssignments.length === 0 ? (
+				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
+					<Truck className="mx-auto text-gray-400 mb-4" size={64} />
+					<p className="text-gray-600 text-lg">
+						No tasks assigned yet
+					</p>
+				</div>
+			) : (
+				<div className="space-y-4">
+					{myAssignments.map((assignment: any) => {
+						const post = mockData.posts.find(
+							(p: any) => p.id === assignment.postId
+						);
+						const donor = post
+							? mockData.users.find(
+									(u: any) => u.id === post.donorId
+							  )
+							: null;
+						const ngo = post
+							? mockData.users.find(
+									(u: any) => u.id === post.assignedNGO
+							  )
+							: null;
+
+						if (!post) return null;
+
+						return (
+							<div
+								key={assignment.id}
+								className="bg-white rounded-xl shadow-lg p-6"
+							>
+								<div className="flex justify-between items-start mb-4">
+									<div>
+										<h3 className="text-xl font-bold text-gray-800">
+											{post.foodType}
+										</h3>
+										<p className="text-gray-600">
+											{post.description}
+										</p>
+									</div>
+									<span
+										className={`px-3 py-1 rounded-full text-sm font-semibold ${
+											post.status === "assigned"
+												? "bg-blue-100 text-blue-800"
+												: post.status === "picked"
+												? "bg-purple-100 text-purple-800"
+												: "bg-green-100 text-green-800"
+										}`}
+									>
+										{post.status.charAt(0).toUpperCase() +
+											post.status.slice(1)}
+									</span>
+								</div>
+
+								<div className="grid md:grid-cols-2 gap-4 mb-4">
+									<div className="space-y-2">
+										<h4 className="font-semibold text-gray-700">
+											Pickup Details
+										</h4>
+										<p className="text-sm text-gray-600">
+											Donor: {donor?.name}
+										</p>
+										<p className="text-sm text-gray-600">
+											Phone: {donor?.phone || "N/A"}
+										</p>
+										<p className="text-sm text-gray-600">
+											Location: {post.location}
+										</p>
+										<p className="text-sm text-gray-600">
+											Quantity: {post.quantity}
+										</p>
+									</div>
+
+									<div className="space-y-2">
+										<h4 className="font-semibold text-gray-700">
+											Delivery Details
+										</h4>
+										<p className="text-sm text-gray-600">
+											NGO: {ngo?.orgName || ngo?.name}
+										</p>
+										<p className="text-sm text-gray-600">
+											Phone: {ngo?.phone || "N/A"}
+										</p>
+										<p className="text-sm text-gray-600">
+											Location: {ngo?.location || "N/A"}
+										</p>
+									</div>
+								</div>
+
+								<div className="flex gap-3">
+									{post.status === "assigned" && (
+										<button
+											onClick={() =>
+												updateStatus(
+													assignment.id,
+													"picked"
+												)
+											}
+											className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2"
+										>
+											<Truck size={20} />
+											Mark as Picked Up
+										</button>
+									)}
+									{post.status === "picked" && (
+										<button
+											onClick={() =>
+												updateStatus(
+													assignment.id,
+													"delivered"
+												)
+											}
+											className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
+										>
+											<CheckCircle size={20} />
+											Mark as Delivered
+										</button>
+									)}
+									{post.status === "delivered" && (
+										<div className="flex-1 bg-green-100 text-green-800 py-2 rounded-lg flex items-center justify-center gap-2 font-semibold">
+											<CheckCircle size={20} />
+											Completed
+										</div>
+									)}
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			)}
+		</div>
+	);
+}
+
+export default Main;
