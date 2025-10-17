@@ -1,5 +1,6 @@
 import { Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
+import { registerUser, sendOtp, verifyOtp } from "../services/auth.service";
 
 export default function Register() {
 	const [formData, setFormData] = useState({
@@ -40,41 +41,47 @@ export default function Register() {
 		}
 	};
 
-	const sendOTP = () => {
-		if (
-			!formData.email ||
-			!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-		)
-			return alert("Please enter a valid email");
+	const sendEmailOTP = async () => {
+		try {
+			if (
+				!formData.email ||
+				!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+			)
+				return alert("Please enter a valid email");
 
-		const otp = "123456"; // Mock OTP
-		setGeneratedOTP(otp);
-		setOtpSent(true);
-		alert(`OTP sent to ${formData.email}: ${otp}`);
+			const res = await sendOtp(formData.email);
+			console.log("OTP Sent Successfully", res);
+
+			setOtpSent(true);
+			alert(`OTP Sent Successfully to ${formData.email}`);
+		} catch (error) {
+			console.error("Unable to sent OTP", error);
+		}
 	};
 
-	const verifyOTP = () => {
-		if (formData.otp === generatedOTP) {
-			setOtpVerified(true);
+	const verifyEmailOTP = async () => {
+		try {
+			const response = await verifyOtp(formData.email, formData.otp);
+			console.log("Verfied otp ", response);
 			alert("OTP Verified!");
-		} else {
+		} catch (error) {
+			console.error("Enable to verify OTP", error);
 			alert("Invalid OTP");
 		}
 	};
 
-	const handleSubmit = (e: any) => {
-		e.preventDefault();
-		if (!otpVerified) {
-			alert("Please verify your email first!");
-			return;
-		}
-		if (formData.password !== formData.confirmPassword) {
-			setErrors({ confirmPassword: "Passwords do not match" });
-			return;
-		}
+	const handleSubmit = async (e: any) => {
+		try {
+			e.preventDefault();
+			if (!otpVerified) {
+				alert("Please verify your email first!");
+				return;
+			}
+			const response = await registerUser(formData);
 
-		// Mock registration
-		alert("Registration successful! Please login.");
+			console.log("Registration successful!, Please login.", response);
+			alert("Registration successful! Please login.");
+		} catch (error) {}
 	};
 	return (
 		<div className="flex flex-col md:flex-row gap-8 items-center min-h-screen p-6 bg-gray-50">
@@ -153,8 +160,8 @@ export default function Register() {
 									otpVerified
 										? undefined
 										: otpSent
-										? verifyOTP
-										: sendOTP
+										? verifyEmailOTP
+										: sendEmailOTP
 								}
 								disabled={otpVerified}
 								className={`px-4 py-2 rounded-lg font-semibold text-white ${
