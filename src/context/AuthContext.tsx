@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-// 🧩 Define context shape
 export interface AuthContextType {
   user: any | null;
   logout: () => void;
@@ -9,10 +7,10 @@ export interface AuthContextType {
   updatePartialUser: any;
 }
 
-// 🧩 Create the context with default undefined
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 🧩 Provider component
+
 export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
 
@@ -34,7 +32,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   };
   const updatePartialUser = (data: Partial<typeof user>) => {
     setUser((prevUser: any) => {
-      const updatedUser = { ...prevUser, ...data }; // merge new fields
+      const updatedUser = { ...prevUser, ...data };
       localStorage.setItem("user", JSON.stringify(updatedUser));
       return updatedUser;
     });
@@ -48,7 +46,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   );
 };
 
-// 🧩 Custom hook for consuming auth
+
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {

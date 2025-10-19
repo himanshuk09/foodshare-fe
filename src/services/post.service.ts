@@ -25,7 +25,15 @@ export const getAllPostBYNGOId = async (id: string) => {
     return null; // optional: return null on error
   }
 };
-
+export const getAllPostBYVolunteerId = async (id: string) => {
+  try {
+    const response: any = await api.get(`/post/volunteer/${id}`); // ✅ await here
+    return response.data; // now this will return the actual data
+  } catch (error) {
+    console.error("Unable to fetch posts", error);
+    return null; // optional: return null on error
+  }
+};
 export const assignVolenteers = async (
   postid: string,
   assignedVolId: string
@@ -40,3 +48,14 @@ export const assignVolenteers = async (
     throw error;
   }
 };
+
+
+export const updatePostStatus = async (id:string,status:string)=>{
+  try {
+    const response = await api.put(`/post/${id}/status`,{status});
+    return response.data;
+  } catch (error) {
+    console.error("Unable to update status");
+    
+  }
+}

@@ -2,6 +2,7 @@ import { CheckCircle, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { registerUser, sendOtp, verifyOtp } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
+import { useLoading } from "../context/LoadingContext";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ export default function Register() {
   const [otpVerified, setOtpVerified] = useState(false);
   const [errors, setErrors] = useState<any>({});
   const navigate = useNavigate();
+  const { setLoading } = useLoading(); // ✅ Loader context
+
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -41,11 +44,13 @@ export default function Register() {
     }
   };
 
+  // ✅ Send OTP API call
   const sendEmailOTP = async () => {
     try {
       if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
         return alert("Please enter a valid email");
 
+      setLoading(true); // Start loader
       const res = await sendOtp(formData.email);
       console.log("OTP Sent Successfully", res);
 
@@ -53,11 +58,16 @@ export default function Register() {
       alert(`OTP Sent Successfully to ${formData.email}`);
     } catch (error) {
       console.error("Unable to send OTP", error);
+      alert("Failed to send OTP. Please try again.");
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
 
+  // ✅ Verify OTP API call
   const verifyEmailOTP = async () => {
     try {
+      setLoading(true);
       const response = await verifyOtp(formData.email, formData.otp);
       console.log("Verified OTP", response);
       setOtpVerified(true);
@@ -65,9 +75,12 @@ export default function Register() {
     } catch (error) {
       console.error("Unable to verify OTP", error);
       alert("Invalid OTP");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ✅ Register API call
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
@@ -75,14 +88,22 @@ export default function Register() {
         alert("Please verify your email first!");
         return;
       }
+
+      setLoading(true);
       const response = await registerUser(formData);
-      alert("Registration successful! Please login.");
+
       if (response.status) {
+        alert("Registration successful! Please login.");
         console.log("Registration successful!", response);
         navigate("/login");
+      } else {
+        alert("Registration failed. Try again!");
       }
     } catch (error) {
       console.error(error);
+      alert("Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 

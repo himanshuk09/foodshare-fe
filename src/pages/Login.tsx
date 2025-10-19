@@ -1,26 +1,39 @@
+
 import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { login } from "../services/auth.service";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useLoading } from "../context/LoadingContext"; // ✅ import loader context
 
 export default function Login() {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const { setUser } = useAuth();
   const navigate = useNavigate();
+  const { setLoading } = useLoading(); // ✅ loader hook
+
   const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
     try {
-      e.preventDefault();
+      setLoading(true); // ✅ show loader
       const response = await login(credentials);
       console.log("Login Successfully ", response);
+
       if (response.status) {
         setUser(response);
         navigate("/feed");
+      } else {
+        alert("Invalid credentials, please try again.");
       }
     } catch (error) {
       console.error("Unable to login", error);
+      alert("Login failed. Please check your credentials or try again later.");
+    } finally {
+      setLoading(false); // ✅ hide loader (always runs)
     }
   };
+
   return (
     <div className="flex flex-col md:flex-row gap-8 items-center max-w-5xl mx-auto py-12 px-4">
       {/* Left Image */}
@@ -59,10 +72,7 @@ export default function Login() {
                 type="email"
                 value={credentials.email}
                 onChange={(e) =>
-                  setCredentials({
-                    ...credentials,
-                    email: e.target.value,
-                  })
+                  setCredentials({ ...credentials, email: e.target.value })
                 }
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 required
@@ -81,10 +91,7 @@ export default function Login() {
                 type="password"
                 value={credentials.password}
                 onChange={(e) =>
-                  setCredentials({
-                    ...credentials,
-                    password: e.target.value,
-                  })
+                  setCredentials({ ...credentials, password: e.target.value })
                 }
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 required

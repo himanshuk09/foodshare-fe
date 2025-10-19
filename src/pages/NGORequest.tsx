@@ -1,9 +1,10 @@
+
 import { MapPin, Package } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getAllUser } from "../services/user.service";
 import { assignVolenteers, getAllPostBYNGOId } from "../services/post.service";
+import { useLoading } from "../context/LoadingContext"; 
 
 export default function NGORequests() {
   const [selectedPost, setSelectedPost] = useState<any>(null);
@@ -11,7 +12,7 @@ export default function NGORequests() {
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { setLoading } = useLoading(); 
 
   // Assign volunteer to a post
   const assignVolunteer = async () => {
@@ -21,38 +22,45 @@ export default function NGORequests() {
     }
 
     try {
+      setLoading(true); 
       const res = await assignVolenteers(selectedPost._id, selectedVolunteer);
       if (res.status) {
         alert("Volunteer assigned successfully! Email notification sent.");
-        fetchPosts();
+        await fetchPosts();
         setSelectedPost(null);
         setSelectedVolunteer("");
       }
     } catch (err) {
       console.error("Unable to assign volunteer:", err);
       alert("Something went wrong!");
+    } finally {
+      setLoading(false); 
     }
   };
 
   // Fetch volunteers
   const fetchVolunteers = async () => {
     try {
+      setLoading(true); 
       const data = await getAllUser("volunteer");
-
-      // fetch volunteers only
       setVolunteers(data || []);
     } catch (error) {
       console.error("Unable to fetch volunteers:", error);
+    } finally {
+      setLoading(false); 
     }
   };
 
   // Fetch posts assigned to this NGO
   const fetchPosts = async () => {
     try {
+      setLoading(true); 
       const data = await getAllPostBYNGOId(user?.user?._id);
       setPosts(data?.posts || []);
     } catch (error) {
       console.error("Unable to fetch posts:", error);
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -72,76 +80,74 @@ export default function NGORequests() {
         </div>
       ) : (
         <div className="grid md:grid-cols-4 gap-6">
-          {posts.map((post: any) => {
-            return (
-              <div
-                key={post._id}
-                className="bg-white rounded-xl shadow-lg p-6 space-y-4"
-              >
-                {post.image && (
-                  <img
-                    src={post.image}
-                    alt="Food"
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                )}
+          {posts.map((post: any) => (
+            <div
+              key={post._id}
+              className="bg-white rounded-xl shadow-lg p-6 space-y-4"
+            >
+              {post.image && (
+                <img
+                  src={post.image}
+                  alt="Food"
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              )}
 
-                <h3 className="text-xl font-bold text-gray-800">
-                  {post.foodType}
-                </h3>
-                <p className="text-gray-600">{post.description}</p>
+              <h3 className="text-xl font-bold text-gray-800">
+                {post.foodType}
+              </h3>
+              <p className="text-gray-600">{post.description}</p>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Package size={16} />
-                    <span>
-                      Quantity: {post.quantity} | Meals: {post.meals}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <MapPin size={16} />
-                    <span>{post.location}</span>
-                  </div>
-
-                  <p className="text-sm text-gray-600">
-                    Donor:{" "}
-                    <span className="font-semibold">{post.donorId?.name}</span>
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Email:{" "}
-                    <span className="font-semibold">{post.donorId?.email}</span>
-                  </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Package size={16} />
+                  <span>
+                    Quantity: {post.quantity} | Meals: {post.meals}
+                  </span>
                 </div>
 
-                {post.assignedVolId ? (
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <p className="text-sm font-semibold text-blue-800">
-                      Assigned to: {post.assignedVolId?.name}
-                    </p>
-                    <p className="text-sm text-blue-600">
-                      {post.assignedVolId?.email}
-                    </p>
-                    <p className="text-sm text-blue-600">
-                      Status: {post.status}
-                    </p>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setSelectedPost(post)}
-                    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
-                  >
-                    Assign Volunteer
-                  </button>
-                )}
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <MapPin size={16} />
+                  <span>{post.location}</span>
+                </div>
+
+                <p className="text-sm text-gray-600">
+                  Donor:{" "}
+                  <span className="font-semibold">{post.donorId?.name}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Email:{" "}
+                  <span className="font-semibold">{post.donorId?.email}</span>
+                </p>
               </div>
-            );
-          })}
+
+              {post.assignedVolId ? (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm font-semibold text-blue-800">
+                    Assigned to: {post.assignedVolId?.name}
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    {post.assignedVolId?.email}
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    Status: {post.status}
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setSelectedPost(post)}
+                  className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                >
+                  Assign Volunteer
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
       {selectedPost && (
-        <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-40">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
             <h3 className="text-xl font-bold text-gray-800 mb-3">
               Assign Volunteer

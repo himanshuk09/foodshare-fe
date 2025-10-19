@@ -1,11 +1,9 @@
 import { Camera, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { updateProfile, uploadImage } from "../services/user.service";
 
 export default function Profile() {
-  const navigate = useNavigate();
   const { updatePartialUser, user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState(user?.user || null);

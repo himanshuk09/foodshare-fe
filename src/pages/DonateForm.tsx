@@ -1,11 +1,13 @@
+
+
 import { Upload } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLoading } from "../context/LoadingContext";
 import { getAllUser, uploadImage } from "../services/user.service";
 import { createPost } from "../services/post.service";
 
-export default function AddPost() {
+export default function DonateForm() {
   const [postData, setPostData] = useState<any>({
     foodType: "",
     quantity: "",
@@ -16,17 +18,12 @@ export default function AddPost() {
     longitude: "",
     image: null,
   });
+
   const [previewImage, setPreviewImage] = useState<string>("");
   const [locationFetched, setLocationFetched] = useState(false);
   const [ngos, setNGOs] = useState<any>([]);
-  const navigate = useNavigate();
   const { user } = useAuth();
-
-  //   const ngos = [
-  //     { id: 1, name: "Helping Hands NGO", location: "Pune" },
-  //     { id: 2, name: "Food Relief Org", location: "Mumbai" },
-  //     { id: 3, name: "ShareMeal Foundation", location: "Delhi" },
-  //   ];
+  const { setLoading } = useLoading(); 
 
   // Fetch current location on mount
   useEffect(() => {
@@ -40,7 +37,6 @@ export default function AddPost() {
             longitude,
           }));
 
-          // Fetch human-readable address
           try {
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
@@ -80,9 +76,11 @@ export default function AddPost() {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // prevent default form submission
+    e.preventDefault();
 
     try {
+      setLoading(true); 
+
       if (!postData.image && !previewImage) {
         alert("Please upload an image.");
         return;
@@ -98,7 +96,6 @@ export default function AddPost() {
       if (!imageUrl && previewImage) {
         const res = await uploadImage(previewImage);
         imageUrl = res.data?.secure_url || res.secure_url;
-        console.log("Uploaded Image:", imageUrl);
       }
 
       const newPost = {
@@ -109,9 +106,8 @@ export default function AddPost() {
         createdAt: new Date().toISOString(),
       };
 
-      console.log(newPost);
-
       await createPost({ ...newPost });
+
       setPostData({
         foodType: "",
         quantity: "",
@@ -122,25 +118,32 @@ export default function AddPost() {
         longitude: "",
         image: null,
       });
+      setPreviewImage("");
       alert("Donation posted successfully!");
     } catch (error) {
       console.error("Unable to submit post:", error);
       alert("Something went wrong while posting donation.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchNGOs = async () => {
     try {
+      setLoading(true);
       const response = await getAllUser("ngo");
-      console.log(response);
       setNGOs(response);
     } catch (error) {
-      console.error("unable to get ngos");
+      console.error("unable to get NGOs");
+    } finally {
+      setLoading(false); 
     }
   };
+
   useEffect(() => {
     fetchNGOs();
   }, []);
+
   if (user.user?.role !== "donor") {
     return (
       <div className="text-center py-12">Only donors can create posts</div>
@@ -186,7 +189,7 @@ export default function AddPost() {
           </div>
         </div>
 
-        {/* Food Details */}
+                {/* Food Details */}
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -356,7 +359,7 @@ export default function AddPost() {
               rows={4}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
               required
-            />
+            />      
           </div>
         </div>
 

@@ -4,15 +4,15 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { getAllPost } from "../services/post.service";
 
-export default function Feed() {
+export default function PostFeed() {
   const [posts, setPosts] = useState<any>([]);
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const fetchPost = async () => {
     try {
-      const res = await getAllPost(); // API should return array of posts
-      setPosts(res.posts || res); // adjust depending on your API response
+      const res = await getAllPost(); 
+      setPosts(res.posts || res); 
       console.log("Posts fetched:", res);
     } catch (error) {
       console.error("Unable to get posts", error);
@@ -33,7 +33,7 @@ export default function Feed() {
           <p className="text-gray-600 text-lg">No donations posted yet</p>
           {user?.user?.role === "donor" && (
             <button
-              onClick={() => navigate("add-post")}
+              onClick={() => navigate("/add-post")}
               className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
             >
               Post Your First Donation
@@ -50,13 +50,13 @@ export default function Feed() {
             return (
               <div
                 key={post._id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 "
               >
                 {post.image && (
                   <img
                     src={post.image}
                     alt="Food"
-                    className="w-full h-48 object-cover"
+                    className="w-full h-72 object-cover"
                   />
                 )}
                 <div className="p-4 space-y-2">
