@@ -108,7 +108,7 @@ export default function Navbar() {
                   NGOs
                 </button>
 
-                {user.user.role === "donor" && (
+                {user?.user?.role === "donor" && (
                   <button
                     onClick={() => navigate("/add-post")}
                     className={`${isActive("/add-post")} hover:text-green-600`}
@@ -117,7 +117,7 @@ export default function Navbar() {
                   </button>
                 )}
 
-                {user.user.role === "ngo" && (
+                {user?.user?.role === "ngo" && (
                   <button
                     onClick={() => navigate("/ngo-requests")}
                     className={`${isActive("/ngo-requests")} hover:text-green-600`}
@@ -126,7 +126,7 @@ export default function Navbar() {
                   </button>
                 )}
 
-                {user.user.role === "volunteer" && (
+                {user?.user?.role === "volunteer" && (
                   <button
                     onClick={() => navigate("/volunteer-task")}
                     className={`${isActive("/volunteer-task")} hover:text-green-600`}
