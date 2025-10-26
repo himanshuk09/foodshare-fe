@@ -13,7 +13,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <HeartHandshake className="text-green-600" size={32} />
-          <span className="text-2xl font-bold text-green-600">FoodShare</span>
+          <span className="text-2xl font-bold text-green-600">ShareABite</span>
         </div>
         <div className="flex gap-4">
           <button
