@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 // const BASEURL = "http://localhost:8080/api";
-const LIVEBASEURL="https://foodshare-be.vercel.app/api"
+const LIVEBASEURL = "https://foodshare-be-new.vercel.app/api";
 // Create axios instance
 const api = axios.create({
 	baseURL: LIVEBASEURL, // ⚙️ change to your API base URL
