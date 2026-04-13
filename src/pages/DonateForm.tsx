@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Upload } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,368 +8,421 @@ import { getAllUser, uploadImage } from "../services/user.service";
 import { createPost } from "../services/post.service";
 
 export default function DonateForm() {
-  const [postData, setPostData] = useState<any>({
-    foodType: "",
-    quantity: "",
-    meals: "",
-    description: "",
-    location: "",
-    latitude: "",
-    longitude: "",
-    image: null,
-  });
+	const [postData, setPostData] = useState<any>({
+		foodType: "",
+		quantity: "",
+		meals: "",
+		description: "",
+		location: "",
+		latitude: "",
+		longitude: "",
+		image: null,
+		expireTime: "",
+	});
 
-  const [previewImage, setPreviewImage] = useState<string>("");
-  const [locationFetched, setLocationFetched] = useState(false);
-  const [ngos, setNGOs] = useState<any>([]);
-  const { user } = useAuth();
-  const { setLoading } = useLoading(); 
+	const [previewImage, setPreviewImage] = useState<string>("");
+	const [locationFetched, setLocationFetched] = useState(false);
+	const [ngos, setNGOs] = useState<any>([]);
+	const { user } = useAuth();
+	const { setLoading } = useLoading();
 
-  // Fetch current location on mount
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setPostData((prev: any) => ({
-            ...prev,
-            latitude,
-            longitude,
-          }));
+	const fetchLocation = async () => {
+		navigator.geolocation.getCurrentPosition(
+			async (position) => {
+				const { latitude, longitude } = position.coords;
 
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-            );
-            const data = await response.json();
-            const address = data.address;
-            const city = address.city || address.town || address.village || "";
-            const state = address.state || "";
-            const country = address.country || "";
-            setPostData((prev: any) => ({
-              ...prev,
-              location: `${city}, ${state}, ${country}`,
-            }));
-            setLocationFetched(true);
-          } catch (err) {
-            console.error("Error fetching location info:", err);
-            setLocationFetched(false);
-          }
-        },
-        (error) => {
-          console.warn("Geolocation error:", error);
-          setLocationFetched(false);
-        }
-      );
-    }
-  }, []);
+				setPostData((prev: any) => ({
+					...prev,
+					latitude,
+					longitude,
+				}));
 
-  const handleImageUpload = (e: any) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+				try {
+					const response = await fetch(
+						`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+						{
+							headers: {
+								"User-Agent": "shareabite",
+							},
+						},
+					);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+					const data = await response.json();
+					const address = data.address || {};
 
-    try {
-      setLoading(true); 
+					const city =
+						address.city || address.town || address.village || "";
+					const state = address.state || "";
+					const country = address.country || "";
 
-      if (!postData.image && !previewImage) {
-        alert("Please upload an image.");
-        return;
-      }
+					setPostData((prev: any) => ({
+						...prev,
+						location: `${city}, ${state}, ${country}`,
+					}));
 
-      if (!postData.latitude || !postData.longitude || !postData.location) {
-        alert("Please provide a location.");
-        return;
-      }
+					setLocationFetched(true);
+				} catch (err) {
+					console.error("Error fetching location info:", err);
+					setLocationFetched(false);
+				}
+			},
+			(error) => {
+				console.warn("Geolocation error:", error);
+				alert(error.message);
+				setLocationFetched(false);
+			},
+			{
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 0,
+			},
+		);
+	};
 
-      let imageUrl = postData.image || "";
+	useEffect(() => {
+		fetchLocation();
+	}, []);
+	const handleImageUpload = (e: any) => {
+		const file = e.target.files[0];
+		if (file) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setPreviewImage(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
 
-      if (!imageUrl && previewImage) {
-        const res = await uploadImage(previewImage);
-        imageUrl = res.data?.secure_url || res.secure_url;
-      }
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
 
-      const newPost = {
-        ...postData,
-        image: imageUrl,
-        donorId: user.user?._id,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      };
+		try {
+			setLoading(true);
 
-      await createPost({ ...newPost });
+			if (!postData.image && !previewImage) {
+				alert("Please upload an image.");
+				return;
+			}
 
-      setPostData({
-        foodType: "",
-        quantity: "",
-        meals: "",
-        description: "",
-        location: "",
-        latitude: "",
-        longitude: "",
-        image: null,
-      });
-      setPreviewImage("");
-      alert("Donation posted successfully!");
-    } catch (error) {
-      console.error("Unable to submit post:", error);
-      alert("Something went wrong while posting donation.");
-    } finally {
-      setLoading(false);
-    }
-  };
+			if (
+				!postData.latitude ||
+				!postData.longitude ||
+				!postData.location
+			) {
+				alert("Please provide a location.");
+				return;
+			}
 
-  const fetchNGOs = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllUser("ngo");
-      setNGOs(response);
-    } catch (error) {
-      console.error("unable to get NGOs");
-    } finally {
-      setLoading(false); 
-    }
-  };
+			let imageUrl = postData.image || "";
 
-  useEffect(() => {
-    fetchNGOs();
-  }, []);
+			if (!imageUrl && previewImage) {
+				const res = await uploadImage(previewImage);
+				imageUrl = res.data?.secure_url || res.secure_url;
+			}
 
-  if (user.user?.role !== "donor") {
-    return (
-      <div className="text-center py-12">Only donors can create posts</div>
-    );
-  }
+			const newPost = {
+				...postData,
+				image: imageUrl,
+				donorId: user.user?._id,
+				status: "pending",
+				createdAt: new Date().toISOString(),
+				expireTime: new Date(postData.expireTime).toISOString(),
+			};
 
-  return (
-    <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Donate Food</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Food Image */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Upload Food Image
-          </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
-            {previewImage ? (
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="max-h-64 mx-auto rounded-lg"
-              />
-            ) : (
-              <div className="space-y-2">
-                <Upload className="mx-auto text-gray-400" size={48} />
-                <p className="text-gray-600">Click to upload food image</p>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              id="food-image"
-              required
-            />
-            <label
-              htmlFor="food-image"
-              className="inline-block mt-4 bg-amber-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-amber-700"
-            >
-              Choose Image
-            </label>
-          </div>
-        </div>
+			await createPost({ ...newPost });
 
-                {/* Food Details */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Food Type
-            </label>
-            <input
-              type="text"
-              value={postData.foodType}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  foodType: e.target.value,
-                })
-              }
-              placeholder="e.g., Cooked meals, Fruits, Vegetables"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-            />
-          </div>
+			setPostData({
+				foodType: "",
+				quantity: "",
+				meals: "",
+				description: "",
+				location: "",
+				latitude: "",
+				longitude: "",
+				image: null,
+			});
+			setPreviewImage("");
+			alert("Donation posted successfully!");
+		} catch (error) {
+			console.error("Unable to submit post:", error);
+			alert("Something went wrong while posting donation.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Quantity
-            </label>
-            <input
-              type="text"
-              value={postData.quantity}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  quantity: e.target.value,
-                })
-              }
-              placeholder="e.g., 10 kg, 5 boxes"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-            />
-          </div>
+	const fetchNGOs = async () => {
+		try {
+			setLoading(true);
+			const response = await getAllUser("ngo");
+			setNGOs(response);
+		} catch {
+			console.error("unable to get NGOs");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Number of Meals
-            </label>
-            <input
-              type="number"
-              value={postData.meals}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  meals: e.target.value,
-                })
-              }
-              placeholder="Approximate number"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-            />
-          </div>
+	useEffect(() => {
+		fetchNGOs();
+	}, []);
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Assign to NGO
-            </label>
-            <select
-              value={postData.assignedNGOId}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  assignedNGOId: e.target.value,
-                })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-            >
-              <option value="">Select NGO</option>
-              {ngos.map((ngo: any) => (
-                <option key={ngo._id} value={ngo._id}>
-                  {ngo.organizationName}
-                </option>
-              ))}
-            </select>
-          </div>
+	if (user?.user?.role !== "donor") {
+		return (
+			<div className="text-center py-12">
+				Only donors can create posts
+			</div>
+		);
+	}
 
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Pickup Location
-            </label>
-            {locationFetched ? (
-              <p className="text-sm text-green-600 mb-1">
-                Auto-detected location (you can edit if needed)
-              </p>
-            ) : (
-              <p className="text-sm text-red-600 mb-1">
-                Unable to detect location. Please enter manually.
-              </p>
-            )}
-            <input
-              type="text"
-              value={postData.location}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  location: e.target.value,
-                })
-              }
-              placeholder="Full address or auto-filled location"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-            />
-          </div>
+	return (
+		<div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+			<h2 className="text-3xl font-bold text-gray-800 mb-6">
+				Donate Food
+			</h2>
+			<form onSubmit={handleSubmit} className="space-y-6">
+				{/* Food Image */}
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-2">
+						Upload Food Image
+					</label>
+					<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
+						{previewImage ? (
+							<img
+								src={previewImage}
+								alt="Preview"
+								className="max-h-64 mx-auto rounded-lg"
+							/>
+						) : (
+							<div className="space-y-2">
+								<Upload
+									className="mx-auto text-gray-400"
+									size={48}
+								/>
+								<p className="text-gray-600">
+									Click to upload food image
+								</p>
+							</div>
+						)}
+						<input
+							type="file"
+							accept="image/*"
+							onChange={handleImageUpload}
+							className="hidden"
+							id="food-image"
+							required
+						/>
+						<label
+							htmlFor="food-image"
+							className="inline-block mt-4 bg-amber-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-amber-700"
+						>
+							Choose Image
+						</label>
+					</div>
+				</div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Latitude
-            </label>
-            <input
-              type="number"
-              step="any"
-              value={postData.latitude}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  latitude: e.target.value,
-                })
-              }
-              placeholder="21.1458"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-              disabled={locationFetched}
-            />
-          </div>
+				{/* Food Details */}
+				<div className="grid md:grid-cols-2 gap-6">
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Donation Type
+						</label>
+						<input
+							type="text"
+							value={postData?.foodType}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									foodType: e.target.value,
+								})
+							}
+							placeholder="e.g., Food, Clothes, Books, Medicines"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						/>
+					</div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Longitude
-            </label>
-            <input
-              type="number"
-              step="any"
-              value={postData.longitude}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  longitude: e.target.value,
-                })
-              }
-              placeholder="79.0882"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-              disabled={locationFetched}
-            />
-          </div>
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Quantity
+						</label>
+						<input
+							type="text"
+							value={postData?.quantity}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									quantity: e.target.value,
+								})
+							}
+							placeholder="e.g., 10 kg, 5 boxes"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						/>
+					</div>
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Expiry Time
+						</label>
+						<input
+							type="datetime-local"
+							value={postData?.expireTime}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									expireTime: e.target.value,
+								})
+							}
+							min={new Date().toISOString().slice(0, 16)}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						/>
+					</div>
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Estimated Beneficiaries
+						</label>
+						<input
+							type="number"
+							value={postData?.meals}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									meals: e.target.value,
+								})
+							}
+							placeholder="e.g., 10 people"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						/>
+					</div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              value={postData.description}
-              onChange={(e) =>
-                setPostData({
-                  ...postData,
-                  description: e.target.value,
-                })
-              }
-              placeholder="Additional details about the food..."
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-              required
-            />      
-          </div>
-        </div>
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Assign to NGO
+						</label>
+						<select
+							value={postData?.assignedNGOId}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									assignedNGOId: e.target.value,
+								})
+							}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						>
+							<option value="">Select NGO</option>
+							{ngos.map((ngo: any) => (
+								<option key={ngo?._id} value={ngo?._id}>
+									{ngo?.organizationName}
+								</option>
+							))}
+						</select>
+					</div>
 
-        <button
-          type="submit"
-          className="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-semibold"
-        >
-          Post Donation
-        </button>
-      </form>
-    </div>
-  );
+					{/* Location */}
+					<div>
+						<label
+							className="block text-sm font-medium text-gray-700 mb-2"
+							onClick={fetchLocation}
+						>
+							Pickup Location
+						</label>
+						{locationFetched ? (
+							<p className="text-sm text-green-600 mb-1">
+								Auto-detected location (you can edit if needed)
+							</p>
+						) : (
+							<p className="text-sm text-red-600 mb-1">
+								Unable to detect location. Please enter
+								manually.
+							</p>
+						)}
+						<input
+							type="text"
+							value={postData?.location}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									location: e.target.value,
+								})
+							}
+							placeholder="Full address or auto-filled location"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Latitude
+						</label>
+						<input
+							type="number"
+							step="any"
+							value={postData?.latitude}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									latitude: e.target.value,
+								})
+							}
+							placeholder="21.1458"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+							disabled={locationFetched}
+						/>
+					</div>
+
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Longitude
+						</label>
+						<input
+							type="number"
+							step="any"
+							value={postData?.longitude}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									longitude: e.target.value,
+								})
+							}
+							placeholder="79.0882"
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+							disabled={locationFetched}
+						/>
+					</div>
+
+					<div className="md:col-span-2">
+						<label className="block text-sm font-medium text-gray-700 mb-2">
+							Description
+						</label>
+						<textarea
+							value={postData?.description}
+							onChange={(e) =>
+								setPostData({
+									...postData,
+									description: e.target.value,
+								})
+							}
+							placeholder="Additional details about the food..."
+							rows={4}
+							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
+							required
+						/>
+					</div>
+				</div>
+
+				<button
+					type="submit"
+					className="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-semibold"
+				>
+					Post Donation
+				</button>
+			</form>
+		</div>
+	);
 }
