@@ -155,6 +155,7 @@ const resources = {
 			"My Donation History": "My Donation History",
 			"Track all your donations and their status":
 				"Track all your donations and their status",
+			Picked: "Picked",
 		},
 	},
 
@@ -311,6 +312,7 @@ const resources = {
 			"Track all your donations and their status":
 				"सभ्य दान आणि त्यांची स्थिती ट्रॅक करा",
 			Delivered: "डिलीवर किया गया",
+			Picked: "उठाया गया",
 		},
 	},
 
@@ -465,6 +467,7 @@ const resources = {
 			"Track all your donations and their status":
 				"अपने सभी दान और उनकी स्थिति को ट्रैक करें",
 			Delivered: "डिलीवर किया गया",
+			Picked: "उठाया गया",
 		},
 	},
 };
