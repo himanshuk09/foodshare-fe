@@ -63,12 +63,23 @@ export default function Navbar() {
 							</button>
 
 							{user?.user?.role === "donor" && (
-								<button
-									onClick={() => navigate("/add-post")}
-									className={`${isActive("/add-post")} hover:text-green-600`}
-								>
-									{t("Donate")}
-								</button>
+								<>
+									{" "}
+									<button
+										onClick={() => navigate("/add-post")}
+										className={`${isActive("/add-post")} hover:text-green-600`}
+									>
+										{t("Donate")}
+									</button>
+									<button
+										onClick={() =>
+											handleNavigate("/donation-history")
+										}
+										className="text-left px-4 py-3 rounded-xl hover:bg-gray-100"
+									>
+										{t("History")}
+									</button>
+								</>
 							)}
 
 							{user?.user?.role === "ngo" && (
