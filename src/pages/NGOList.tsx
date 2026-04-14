@@ -6,6 +6,7 @@ import { Heart, Mail, Phone, Users } from "lucide-react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { getAllUser } from "../services/user.service";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // Fix default marker icons
 const DefaultIcon = L.icon({
@@ -26,6 +27,7 @@ L.Marker.prototype.options.icon = DefaultIcon;
 export default function NGOList() {
 	const [ngos, setNGOs] = useState<any>([]);
 	const [loading, setLoading] = useState(true);
+	const { t } = useTranslation();
 
 	const fetchNGOs = async () => {
 		try {
@@ -48,7 +50,7 @@ export default function NGOList() {
 		<div className="grid md:grid-cols-1 gap-6">
 			{/* NGO List */}
 			<h2 className="text-3xl font-bold text-gray-800">
-				Registered NGOs
+				{t("Registered NGOs")}
 			</h2>
 			{loading ? (
 				<div className="flex justify-center items-center py-20">
@@ -58,7 +60,7 @@ export default function NGOList() {
 				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
 					<Users className="mx-auto text-gray-400 mb-4" size={64} />
 					<p className="text-gray-600 text-lg">
-						No NGOs registered yet
+						{t("No NGOs registered yet")}
 					</p>
 				</div>
 			) : (
@@ -103,7 +105,8 @@ export default function NGOList() {
 								</div>
 
 								<p className="text-xs text-gray-500">
-									Lat: {ngo?.latitude}, Lng: {ngo?.longitude}
+									{t("Latitude")}: {ngo?.latitude},{" "}
+									{t("Longitude")}: {ngo?.longitude}
 								</p>
 							</div>
 						</div>
@@ -147,7 +150,7 @@ export default function NGOList() {
 											rel="noreferrer"
 											className="text-blue-600 underline text-sm"
 										>
-											View on Google Maps
+											{t("View on Google Maps")}
 										</a>
 									</div>
 								</Popup>

@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MapPin, Package, Users, Locate } from "lucide-react";
+import { MapPin, Package, Users, Locate, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { getAllPost } from "../services/post.service";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { useTranslation } from "react-i18next";
 
 export default function PostFeed() {
 	const [posts, setPosts] = useState<any>([]);
@@ -12,6 +13,8 @@ export default function PostFeed() {
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(true);
 	const [selectedPost, setSelectedPost] = useState<any>(null);
+	const { t } = useTranslation();
+
 	const fetchPost = async () => {
 		try {
 			setLoading(true);
@@ -71,7 +74,7 @@ export default function PostFeed() {
 	return (
 		<div className="space-y-6">
 			<h2 className="text-3xl font-bold text-gray-800">
-				Food Donation Feed
+				{t("Food Donation Feed")}
 			</h2>
 
 			{loading ? (
@@ -82,14 +85,14 @@ export default function PostFeed() {
 				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
 					<Package className="mx-auto text-gray-400 mb-4" size={64} />
 					<p className="text-gray-600 text-lg">
-						No donations posted yet
+						{t("No donations posted yet")}
 					</p>
 					{user?.user?.role === "donor" && (
 						<button
 							onClick={() => navigate("/add-post")}
 							className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
 						>
-							Post Your First Donation
+							{t("Post Your First Donation")}
 						</button>
 					)}
 				</div>
@@ -150,29 +153,36 @@ export default function PostFeed() {
 
 									<div className="flex items-center gap-2 text-sm text-gray-600">
 										<Package size={16} />
-										<span>Quantity: {post?.quantity}</span>
+										<span>
+											{t("Quantity")}: {post?.quantity}
+										</span>
 									</div>
 
 									<div className="flex items-center gap-2 text-sm text-gray-600">
 										<Users size={16} />
-										<span>Meals: {post?.meals}</span>
+										<span>
+											{t("Meals")}: {post?.meals}
+										</span>
 									</div>
 
 									<div className="flex items-center gap-2 text-sm text-gray-600">
 										<MapPin size={16} />
-										<span>{post?.location}</span>
+										<span>
+											{t("Donation Location")}:{" "}
+											{post?.location}
+										</span>
 									</div>
 
 									<div className="pt-2 border-t">
 										<p className="text-sm text-gray-600">
-											Donor:{" "}
+											{t("Donor")}:{" "}
 											<span className="font-semibold">
 												{donor?.name}
 											</span>
 										</p>
 										{ngo && (
 											<p className="text-sm text-gray-600">
-												NGO:{" "}
+												{t("NGO")}:{" "}
 												<span className="font-semibold">
 													{ngo.organizationName ||
 														ngo.name}
@@ -181,7 +191,7 @@ export default function PostFeed() {
 										)}
 										{volunteer && (
 											<p className="text-sm text-gray-600">
-												Volunteer:{" "}
+												{t("Volunteer")}:{" "}
 												<span className="font-semibold">
 													{volunteer.name}
 												</span>
@@ -221,13 +231,13 @@ export default function PostFeed() {
 						{/* Close Button */}
 						<button
 							onClick={() => setSelectedPost(null)}
-							className="absolute top-2 right-2 text-gray-600 hover:text-black"
+							className="absolute top-2 right-2 text-gray-600 hover:text-black cursor-pointer"
 						>
-							✕
+							<X size={30} />
 						</button>
 
 						<h2 className="text-xl font-bold mb-2">
-							Donation Location
+							{t("Donation Location")}
 						</h2>
 
 						<div className="h-[600px] w-full rounded-lg overflow-hidden">
@@ -264,7 +274,9 @@ export default function PostFeed() {
 														rel="noreferrer"
 														className="text-blue-600 underline text-sm"
 													>
-														Open in Google Maps
+														{t(
+															"Open in Google Maps",
+														)}
 													</a>
 												</div>
 											</Popup>

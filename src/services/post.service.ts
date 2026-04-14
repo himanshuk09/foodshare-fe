@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "./api";
 
 export const createPost = async (payload: any) => {
@@ -28,6 +30,15 @@ export const getAllPostBYNGOId = async (id: string) => {
 export const getAllPostBYVolunteerId = async (id: string) => {
 	try {
 		const response: any = await api.get(`/post/volunteer/${id}`); //  await here
+		return response.data; // now this will return the actual data
+	} catch (error) {
+		console.error("Unable to fetch posts", error);
+		return null; // optional: return null on error
+	}
+};
+export const getAllPostBYDonorId = async (id: string) => {
+	try {
+		const response: any = await api.get(`/post/donor/${id}`); //  await here
 		return response.data; // now this will return the actual data
 	} catch (error) {
 		console.error("Unable to fetch posts", error);

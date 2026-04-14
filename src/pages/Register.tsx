@@ -5,6 +5,7 @@ import { registerUser, sendOtp, verifyOtp } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 export default function Register() {
 	const [formData, setFormData] = useState({
@@ -31,7 +32,7 @@ export default function Register() {
 			if (name === "confirmPassword" && value !== formData.password) {
 				setErrors((prev: any) => ({
 					...prev,
-					confirmPassword: "Passwords do not match",
+					confirmPassword: t("Passwords do not match"),
 				}));
 			} else if (
 				name === "password" &&
@@ -40,7 +41,7 @@ export default function Register() {
 			) {
 				setErrors((prev: any) => ({
 					...prev,
-					confirmPassword: "Passwords do not match",
+					confirmPassword: t("Passwords do not match"),
 				}));
 			} else {
 				setErrors((prev: any) => ({ ...prev, confirmPassword: "" }));
@@ -55,17 +56,21 @@ export default function Register() {
 				!formData.email ||
 				!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
 			)
-				return alert("Please enter a valid email");
+				return toast(t("Please enter a valid email"), {
+					type: "warning",
+				});
 
 			setLoading(true); // Start loader
 			const res = await sendOtp(formData.email);
 			console.log("OTP Sent Successfully", res);
 
 			setOtpSent(true);
-			alert(`OTP Sent Successfully to ${formData.email}`);
+			toast(t("OTP Sent Successfully"), { type: "success" });
 		} catch (error) {
 			console.error("Unable to send OTP", error);
-			alert("Failed to send OTP. Please try again.");
+			toast(t("Failed to send OTP. Please try again."), {
+				type: "error",
+			});
 		} finally {
 			setLoading(false); // Stop loader
 		}
@@ -78,10 +83,10 @@ export default function Register() {
 			const response = await verifyOtp(formData.email, formData.otp);
 			console.log("Verified OTP", response);
 			setOtpVerified(true);
-			alert("OTP Verified!");
+			toast(t("OTP Verified!"), { type: "success" });
 		} catch (error) {
 			console.error("Unable to verify OTP", error);
-			alert("Invalid OTP");
+			toast(t("Invalid OTP"), { type: "error" });
 		} finally {
 			setLoading(false);
 		}
@@ -92,7 +97,9 @@ export default function Register() {
 		e.preventDefault();
 		try {
 			if (!otpVerified) {
-				alert("Please verify your email first!");
+				toast(t("Please verify your email first!"), {
+					type: "warning",
+				});
 				return;
 			}
 
@@ -100,15 +107,21 @@ export default function Register() {
 			const response = await registerUser(formData);
 
 			if (response.status) {
-				alert("Registration successful! Please login.");
+				toast(t("Registration successful! Please login."), {
+					type: "success",
+				});
 				console.log("Registration successful!", response);
 				navigate("/login");
 			} else {
-				alert("Registration failed. Try again!");
+				toast(t("Registration failed. Please try again."), {
+					type: "error",
+				});
 			}
 		} catch (error) {
 			console.error(error);
-			alert("Something went wrong. Please try again later.");
+			toast(t("Something went wrong. Please try again later."), {
+				type: "error",
+			});
 		} finally {
 			setLoading(false);
 		}

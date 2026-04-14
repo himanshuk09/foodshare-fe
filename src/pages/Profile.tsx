@@ -3,11 +3,14 @@ import { Camera, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { updateProfile, uploadImage } from "../services/user.service";
+import { useTranslation } from "react-i18next";
 
 export default function Profile() {
 	const { updatePartialUser, user } = useAuth();
 	const [editing, setEditing] = useState(false);
 	const [profile, setProfile] = useState(user?.user || null);
+	const { t } = useTranslation();
+
 	const defaultUserAvatar = "https://ui-avatars.com/api/?name=User"; // for normal users/volunteers/donors
 	const defaultNGOAvatar =
 		"https://plus.unsplash.com/premium_photo-1674588218207-474f9ca6d3d8?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGluZGlhfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=600";
@@ -17,8 +20,9 @@ export default function Profile() {
 		user?.user?.avatar ||
 			(user?.user?.role === "ngo" ? defaultNGOAvatar : defaultUserAvatar),
 	);
-	console.log(JSON.stringify(user, null, 1));
+
 	const [locationFetched, setLocationFetched] = useState(false);
+
 	const handleImageUpload = async (
 		e: React.ChangeEvent<HTMLInputElement>,
 	) => {
@@ -109,7 +113,7 @@ export default function Profile() {
 	if (!user) {
 		return (
 			<div className="text-center py-12">
-				Please login to view profile
+				{t("Please login to view profile")}
 			</div>
 		);
 	}
@@ -122,7 +126,7 @@ export default function Profile() {
 					onClick={() => (editing ? handleSave() : setEditing(true))}
 					className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
 				>
-					{editing ? "Save Changes" : "Edit Profile"}
+					{editing ? t("Save Changes") : t("Edit Profile")}
 				</button>
 			</div>
 
@@ -163,7 +167,7 @@ export default function Profile() {
 				<div className="grid md:grid-cols-2 gap-6">
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Name
+							{t("Name")}
 						</label>
 						<input
 							type="text"
@@ -178,7 +182,7 @@ export default function Profile() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Email
+							{t("Email")}
 						</label>
 						<input
 							type="email"
@@ -196,7 +200,7 @@ export default function Profile() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Phone
+							{t("Phone")}
 						</label>
 						<input
 							type="tel"
@@ -215,12 +219,15 @@ export default function Profile() {
 					<div>
 						{locationFetched ? (
 							<p className="text-sm text-green-600 mb-1">
-								Auto-detected location (you can edit if needed)
+								{t(
+									"Auto-detected location (you can edit if needed)",
+								)}
 							</p>
 						) : (
 							<p className="text-sm text-red-600 mb-1">
-								Unable to detect location. Please enter
-								manually.
+								{t(
+									"Unable to detect location. Please enter manually.",
+								)}
 							</p>
 						)}
 						<input
@@ -240,7 +247,7 @@ export default function Profile() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Latitude
+							{t("Latitude")}
 						</label>
 						<input
 							type="number"
@@ -260,7 +267,7 @@ export default function Profile() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Longitude
+							{t("Longitude")}
 						</label>
 						<input
 							type="number"
@@ -282,7 +289,7 @@ export default function Profile() {
 						<>
 							<div className="md:col-span-2">
 								<label className="block text-sm font-medium text-gray-700 mb-2">
-									Organization Name
+									{t("Organization Name")}
 								</label>
 								<input
 									type="text"
@@ -299,7 +306,7 @@ export default function Profile() {
 							</div>
 							<div className="md:col-span-2">
 								<label className="block text-sm font-medium text-gray-700 mb-2">
-									About Organization
+									{t("About Organization")}
 								</label>
 								<textarea
 									value={profile?.aboutOrganization || ""}
@@ -320,7 +327,7 @@ export default function Profile() {
 					{profile?.role === "volunteer" && (
 						<div className="md:col-span-2">
 							<label className="block text-sm font-medium text-gray-700 mb-2">
-								Availability
+								{t("Availability")}
 							</label>
 							<input
 								type="text"

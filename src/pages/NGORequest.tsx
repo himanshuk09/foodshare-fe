@@ -6,19 +6,22 @@ import { useAuth } from "../context/AuthContext";
 import { getAllUser } from "../services/user.service";
 import { assignVolenteers, getAllPostBYNGOId } from "../services/post.service";
 import { useLoading } from "../context/LoadingContext";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 export default function NGORequests() {
 	const [selectedPost, setSelectedPost] = useState<any>(null);
 	const [selectedVolunteer, setSelectedVolunteer] = useState("");
 	const [volunteers, setVolunteers] = useState<any[]>([]);
 	const [posts, setPosts] = useState<any[]>([]);
+	const [loader, setLoader] = useState(true);
 	const { user } = useAuth();
 	const { setLoading } = useLoading();
-
+	const { t } = useTranslation();
 	// Assign volunteer to a post
 	const assignVolunteer = async () => {
 		if (!selectedPost || !selectedVolunteer) {
-			alert("Please select both post and volunteer");
+			toast(t("Please select both post and volunteer"), { type: "info" });
 			return;
 		}
 
@@ -29,8 +32,13 @@ export default function NGORequests() {
 				selectedVolunteer,
 			);
 			if (res.status) {
-				alert(
-					"Volunteer assigned successfully! Email notification sent.",
+				toast(
+					t(
+						"Volunteer assigned successfully! Email notification sent.",
+					),
+					{
+						type: "success",
+					},
 				);
 				await fetchPosts();
 				setSelectedPost(null);
@@ -38,7 +46,7 @@ export default function NGORequests() {
 			}
 		} catch (err) {
 			console.error("Unable to assign volunteer:", err);
-			alert("Something went wrong!");
+			toast(t("Something went wrong!"), { type: "error" });
 		} finally {
 			setLoading(false);
 		}
@@ -61,29 +69,37 @@ export default function NGORequests() {
 	const fetchPosts = async () => {
 		try {
 			setLoading(true);
+			setLoader(true);
 			const data = await getAllPostBYNGOId(user?.user?._id);
 			setPosts(data?.posts || []);
 		} catch (error) {
 			console.error("Unable to fetch posts:", error);
 		} finally {
 			setLoading(false);
+			setLoader(false);
 		}
 	};
 
 	useEffect(() => {
 		fetchVolunteers();
 		fetchPosts();
-	}, []);
+	}, [user]);
 
 	return (
 		<div className="space-y-6">
-			<h2 className="text-3xl font-bold text-gray-800">NGO Dashboard</h2>
+			<h2 className="text-3xl font-bold text-gray-800">
+				{t("NGO Dashboard")}
+			</h2>
 
-			{posts.length === 0 ? (
+			{loader ? (
+				<div className="flex justify-center items-center py-20">
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+				</div>
+			) : posts.length === 0 ? (
 				<div className="text-center py-12 bg-white rounded-2xl shadow-lg">
 					<Package className="mx-auto text-gray-400 mb-4" size={64} />
 					<p className="text-gray-600 text-lg">
-						No donations assigned yet
+						{t("No donations assigned yet")}
 					</p>
 				</div>
 			) : (
@@ -110,8 +126,8 @@ export default function NGORequests() {
 								<div className="flex items-center gap-2 text-sm text-gray-600">
 									<Package size={16} />
 									<span>
-										Quantity: {post?.quantity} | Meals:{" "}
-										{post?.meals}
+										{t("Quantity")}: {post?.quantity} |{" "}
+										{t("Meals")}: {post?.meals}
 									</span>
 								</div>
 
@@ -121,13 +137,13 @@ export default function NGORequests() {
 								</div>
 
 								<p className="text-sm text-gray-600">
-									Donor:{" "}
+									{t("Donor")}:{" "}
 									<span className="font-semibold">
 										{post?.donorId?.name}
 									</span>
 								</p>
 								<p className="text-sm text-gray-600">
-									Email:{" "}
+									{t("Email")}:{" "}
 									<span className="font-semibold">
 										{post?.donorId?.email}
 									</span>
@@ -137,13 +153,14 @@ export default function NGORequests() {
 							{post?.assignedVolId ? (
 								<div className="bg-blue-50 p-4 rounded-lg">
 									<p className="text-sm font-semibold text-blue-800">
-										Assigned to: {post?.assignedVolId?.name}
+										{t("Assigned to")}:{" "}
+										{post?.assignedVolId?.name}
 									</p>
 									<p className="text-sm text-blue-600">
 										{post?.assignedVolId?.email}
 									</p>
 									<p className="text-sm text-blue-600">
-										Status: {post?.status}
+										{t("Status")}: {post?.status}
 									</p>
 								</div>
 							) : (
@@ -151,7 +168,7 @@ export default function NGORequests() {
 									onClick={() => setSelectedPost(post)}
 									className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
 								>
-									Assign Volunteer
+									{t("Assign Volunteer")}
 								</button>
 							)}
 						</div>

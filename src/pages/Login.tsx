@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useLoading } from "../context/LoadingContext"; //  import loader context
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 export default function Login() {
 	const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -21,18 +22,22 @@ export default function Login() {
 		try {
 			setLoading(true); //  show loader
 			const response = await login(credentials);
-			console.log("Login Successfully ", response);
 
 			if (response.status) {
 				setUser(response);
 				navigate("/feed");
 			} else {
-				alert("Invalid credentials, please try again.");
+				toast(t("Invalid credentials, please try again."), {
+					type: "error",
+				});
 			}
 		} catch (error) {
 			console.error("Unable to login", error);
-			alert(
-				"Login failed. Please check your credentials or try again later.",
+			toast(
+				t(
+					"Login failed. Please check your credentials or try again later.",
+				),
+				{ type: "error" },
 			);
 		} finally {
 			setLoading(false); //  hide loader (always runs)

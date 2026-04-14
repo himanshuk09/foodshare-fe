@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { useLoading } from "../context/LoadingContext";
 import { getAllUser, uploadImage } from "../services/user.service";
 import { createPost } from "../services/post.service";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 export default function DonateForm() {
 	const [postData, setPostData] = useState<any>({
@@ -25,6 +27,7 @@ export default function DonateForm() {
 	const [ngos, setNGOs] = useState<any>([]);
 	const { user } = useAuth();
 	const { setLoading } = useLoading();
+	const { t } = useTranslation();
 
 	const fetchLocation = async () => {
 		navigator.geolocation.getCurrentPosition(
@@ -68,7 +71,7 @@ export default function DonateForm() {
 			},
 			(error) => {
 				console.warn("Geolocation error:", error);
-				alert(error.message);
+				toast(t(error.message), { type: "info" });
 				setLocationFetched(false);
 			},
 			{
@@ -82,6 +85,7 @@ export default function DonateForm() {
 	useEffect(() => {
 		fetchLocation();
 	}, []);
+
 	const handleImageUpload = (e: any) => {
 		const file = e.target.files[0];
 		if (file) {
@@ -100,7 +104,7 @@ export default function DonateForm() {
 			setLoading(true);
 
 			if (!postData.image && !previewImage) {
-				alert("Please upload an image.");
+				toast(t("Please upload an image."), { type: "info" });
 				return;
 			}
 
@@ -109,7 +113,7 @@ export default function DonateForm() {
 				!postData.longitude ||
 				!postData.location
 			) {
-				alert("Please provide a location.");
+				toast(t("Please provide a location."), { type: "info" });
 				return;
 			}
 
@@ -142,10 +146,12 @@ export default function DonateForm() {
 				image: null,
 			});
 			setPreviewImage("");
-			alert("Donation posted successfully!");
+			toast(t("Donation posted successfully!"), { type: "success" });
 		} catch (error) {
 			console.error("Unable to submit post:", error);
-			alert("Something went wrong while posting donation.");
+			toast(t("Something went wrong while posting donation."), {
+				type: "error",
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -178,13 +184,13 @@ export default function DonateForm() {
 	return (
 		<div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
 			<h2 className="text-3xl font-bold text-gray-800 mb-6">
-				Donate Food
+				{t("Donate Food")}
 			</h2>
 			<form onSubmit={handleSubmit} className="space-y-6">
 				{/* Food Image */}
 				<div>
 					<label className="block text-sm font-medium text-gray-700 mb-2">
-						Upload Food Image
+						{t("Upload Food Image")}
 					</label>
 					<div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer">
 						{previewImage ? (
@@ -200,7 +206,7 @@ export default function DonateForm() {
 									size={48}
 								/>
 								<p className="text-gray-600">
-									Click to upload food image
+									{t("Click to upload food image")}
 								</p>
 							</div>
 						)}
@@ -216,7 +222,7 @@ export default function DonateForm() {
 							htmlFor="food-image"
 							className="inline-block mt-4 bg-amber-600 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-amber-700"
 						>
-							Choose Image
+							{t("Choose Image")}
 						</label>
 					</div>
 				</div>
@@ -225,7 +231,7 @@ export default function DonateForm() {
 				<div className="grid md:grid-cols-2 gap-6">
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Donation Type
+							{t("Donation Type")}
 						</label>
 						<input
 							type="text"
@@ -236,7 +242,9 @@ export default function DonateForm() {
 									foodType: e.target.value,
 								})
 							}
-							placeholder="e.g., Food, Clothes, Books, Medicines"
+							placeholder={t(
+								"e.g., Food, Clothes, Books, Medicines",
+							)}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
@@ -244,7 +252,7 @@ export default function DonateForm() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Quantity
+							{t("Quantity")}
 						</label>
 						<input
 							type="text"
@@ -255,14 +263,14 @@ export default function DonateForm() {
 									quantity: e.target.value,
 								})
 							}
-							placeholder="e.g., 10 kg, 5 boxes"
+							placeholder={t("e.g., 10 kg, 5 boxes")}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Expiry Time
+							{t("Expiry Time")}
 						</label>
 						<input
 							type="datetime-local"
@@ -280,7 +288,7 @@ export default function DonateForm() {
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Estimated Beneficiaries
+							{t("Estimated Beneficiaries")}
 						</label>
 						<input
 							type="number"
@@ -291,7 +299,7 @@ export default function DonateForm() {
 									meals: e.target.value,
 								})
 							}
-							placeholder="e.g., 10 people"
+							placeholder={t("e.g., 50 people")}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
@@ -299,7 +307,7 @@ export default function DonateForm() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Assign to NGO
+							{t("Assign to NGO")}
 						</label>
 						<select
 							value={postData?.assignedNGOId}
@@ -312,7 +320,7 @@ export default function DonateForm() {
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						>
-							<option value="">Select NGO</option>
+							<option value="">{t("Select NGO")}</option>
 							{ngos.map((ngo: any) => (
 								<option key={ngo?._id} value={ngo?._id}>
 									{ngo?.organizationName}
@@ -327,18 +335,17 @@ export default function DonateForm() {
 							className="block text-sm font-medium text-gray-700 mb-2"
 							onClick={fetchLocation}
 						>
-							Pickup Location
+							{t("Pickup Location")}{" "}
+							{locationFetched ? (
+								<span className="text-green-600 ml-2">
+									({t("Auto-detected, you can edit")})
+								</span>
+							) : (
+								<span className="text-red-600 ml-2">
+									{t("Enter manually")}
+								</span>
+							)}
 						</label>
-						{locationFetched ? (
-							<p className="text-sm text-green-600 mb-1">
-								Auto-detected location (you can edit if needed)
-							</p>
-						) : (
-							<p className="text-sm text-red-600 mb-1">
-								Unable to detect location. Please enter
-								manually.
-							</p>
-						)}
 						<input
 							type="text"
 							value={postData?.location}
@@ -348,7 +355,7 @@ export default function DonateForm() {
 									location: e.target.value,
 								})
 							}
-							placeholder="Full address or auto-filled location"
+							placeholder={t("e.g., 123 Main St, City, Country")}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
 						/>
@@ -356,7 +363,7 @@ export default function DonateForm() {
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Latitude
+							{t("Latitude")}
 						</label>
 						<input
 							type="number"
@@ -371,13 +378,12 @@ export default function DonateForm() {
 							placeholder="21.1458"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
-							disabled={locationFetched}
 						/>
 					</div>
 
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Longitude
+							{t("Longitude")}
 						</label>
 						<input
 							type="number"
@@ -392,13 +398,12 @@ export default function DonateForm() {
 							placeholder="79.0882"
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
-							disabled={locationFetched}
 						/>
 					</div>
 
 					<div className="md:col-span-2">
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							Description
+							{t("Description")}
 						</label>
 						<textarea
 							value={postData?.description}
@@ -408,7 +413,9 @@ export default function DonateForm() {
 									description: e.target.value,
 								})
 							}
-							placeholder="Additional details about the food..."
+							placeholder={t(
+								"Additional details about the food...",
+							)}
 							rows={4}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
 							required
@@ -420,7 +427,7 @@ export default function DonateForm() {
 					type="submit"
 					className="w-full bg-amber-600 text-white py-3 rounded-lg hover:bg-amber-700 font-semibold"
 				>
-					Post Donation
+					{t("Post Donation")}
 				</button>
 			</form>
 		</div>
