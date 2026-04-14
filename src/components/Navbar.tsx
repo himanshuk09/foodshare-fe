@@ -75,7 +75,7 @@ export default function Navbar() {
 										onClick={() =>
 											handleNavigate("/donation-history")
 										}
-										className="text-left px-4 py-3 rounded-xl hover:bg-gray-100"
+										className={`${isActive("/donation-history")} hover:text-green-600 `}
 									>
 										{t("History")}
 									</button>

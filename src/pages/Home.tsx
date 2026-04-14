@@ -199,6 +199,7 @@ export default function Home() {
 				<button
 					onClick={() => navigate("register")}
 					className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100"
+					disabled={!!user}
 				>
 					{t("Get Started")}
 				</button>
