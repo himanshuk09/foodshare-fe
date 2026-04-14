@@ -88,7 +88,7 @@ const resources = {
 			"Oops! The page you are looking for does not exist.":
 				"Oops! The page you are looking for does not exist.",
 			"Go to Home": "Go to Home",
-			"Food Donation Feed": "Food Donation Feed",
+			"Donation Feed": "Donation Feed",
 			"No donations posted yet": "No donations posted yet",
 			"Post Your First Donation": "Post Your First Donation",
 			"Donation Location": "Donation Location",
@@ -149,6 +149,12 @@ const resources = {
 			"Monthly Donation Analytics": "Monthly Donation Analytics",
 			"User denied Geolocation": "User denied Geolocation",
 			Pending: "Pending",
+			Delivered: "Delivered",
+			History: "History",
+			Assigned: "Assigned",
+			"My Donation History": "My Donation History",
+			"Track all your donations and their status":
+				"Track all your donations and their status",
 		},
 	},
 
@@ -244,7 +250,7 @@ const resources = {
 			"Oops! The page you are looking for does not exist.":
 				"यह पेज उपलब्ध नहीं है",
 			"Go to Home": "होम पर जाएं",
-			"Food Donation Feed": "भोजन दान सूची",
+			"Donation Feed": "दान सूची",
 			"No donations posted yet": "अभी कोई दान पोस्ट नहीं हुआ",
 			"Post Your First Donation": "पहला दान पोस्ट करें",
 			"Donation Location": "दान स्थान",
@@ -299,6 +305,12 @@ const resources = {
 			"Monthly Donation Analytics": "मासिक दान विश्लेषण",
 			"User denied Geolocation": "उपयोगकर्ता ने जियोलोकेशन से इनकार किया",
 			Pending: "लंबित",
+			History: "इतिहास",
+			Assigned: "सौंपा गया",
+			"My Donation History": "माझे दान इतिहास",
+			"Track all your donations and their status":
+				"सभ्य दान आणि त्यांची स्थिती ट्रॅक करा",
+			Delivered: "डिलीवर किया गया",
 		},
 	},
 
@@ -392,7 +404,7 @@ const resources = {
 			"Oops! The page you are looking for does not exist.":
 				"पेज सापडले नाही",
 			"Go to Home": "होम वर जा",
-			"Food Donation Feed": "अन्न दान यादी",
+			"Donation Feed": "दान यादी",
 			"No donations posted yet": "अजून कोणतेही दान नाही",
 			"Post Your First Donation": "पहिले दान पोस्ट करा",
 			"Donation Location": "दान ठिकाण",
@@ -447,6 +459,12 @@ const resources = {
 			"Monthly Donation Analytics": "मासिक देणगी विश्लेषण",
 			"User denied Geolocation": "वापरकर्त्याने भौगोलिक स्थान नाकारले",
 			Pending: "प्रलंबित",
+			History: "इतिहास",
+			Assigned: "नियुक्त केले",
+			"My Donation History": "माझे दान इतिहास",
+			"Track all your donations and their status":
+				"अपने सभी दान और उनकी स्थिति को ट्रैक करें",
+			Delivered: "डिलीवर किया गया",
 		},
 	},
 };

@@ -145,7 +145,7 @@ export default function Navbar() {
 						</button>
 
 						{langOpen && (
-							<div className="absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-md">
+							<div className="absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-md z-50">
 								<button
 									onClick={() => changeLanguage("en")}
 									className="block w-full px-3 py-2 hover:bg-gray-100"

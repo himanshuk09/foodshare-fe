@@ -76,7 +76,7 @@ export default function DonationHistory() {
 
 									{/* Status Badge */}
 									<span
-										className={`px-2 py-1 rounded-full text-xs font-semibold ${
+										className={`px-2 py-1 rounded-full capitalize text-xs font-semibold ${
 											post.status === "pending"
 												? "bg-yellow-100 text-yellow-800"
 												: post.status === "assigned"
@@ -86,7 +86,12 @@ export default function DonationHistory() {
 														: "bg-green-100 text-green-800"
 										}`}
 									>
-										{post.status}
+										{t(
+											post.status
+												?.charAt(0)
+												.toUpperCase() +
+												post.status?.slice(1),
+										)}
 									</span>
 								</div>
 
