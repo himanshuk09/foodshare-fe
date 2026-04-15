@@ -2,11 +2,11 @@
 
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Heart, Mail, Phone, Users } from "lucide-react";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import { getAllUser } from "../services/user.service";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getAllUserByRole } from "../services/user.service";
+import { Heart, Mail, Phone, Users } from "lucide-react";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 // Fix default marker icons
 const DefaultIcon = L.icon({
@@ -25,14 +25,15 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function NGOList() {
+	const { t } = useTranslation();
+
 	const [ngos, setNGOs] = useState<any>([]);
 	const [loading, setLoading] = useState(true);
-	const { t } = useTranslation();
 
 	const fetchNGOs = async () => {
 		try {
 			setLoading(true);
-			const response = await getAllUser("ngo");
+			const response = await getAllUserByRole("ngo");
 			console.log("NGOs:", response);
 			setNGOs(response);
 		} catch (error) {
@@ -134,7 +135,7 @@ export default function NGOList() {
 						)
 						.map((ngo: any, index: number) => (
 							<Marker
-								key={index}
+								key={ngo?._id || index}
 								position={[ngo.latitude, ngo.longitude]}
 							>
 								<Popup>

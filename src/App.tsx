@@ -16,6 +16,8 @@ import VolunteerDashboard from "./pages/VolunteerTask";
 import MainLayout from "./pages/MainLayout";
 import { ToastContainer } from "react-toastify";
 import DonationHistory from "./pages/DonationHistory";
+import PublicRoute from "./components/PublicRoute";
+import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 
 export default function App() {
 	return (
@@ -27,8 +29,22 @@ export default function App() {
 						{/* Layout routes */}
 						<Route element={<MainLayout />}>
 							<Route path="/" element={<Home />} />
-							<Route path="/register" element={<Register />} />
-							<Route path="/login" element={<Login />} />
+							<Route
+								path="/register"
+								element={
+									<PublicRoute>
+										<Register />
+									</PublicRoute>
+								}
+							/>
+							<Route
+								path="/login"
+								element={
+									<PublicRoute>
+										<Login />
+									</PublicRoute>
+								}
+							/>
 
 							<Route
 								path="/feed"
@@ -51,6 +67,14 @@ export default function App() {
 								element={
 									<ProtectedRoute>
 										<DonationHistory />
+									</ProtectedRoute>
+								}
+							/>
+							<Route
+								path="/analytics"
+								element={
+									<ProtectedRoute>
+										<AnalyticsDashboard />
 									</ProtectedRoute>
 								}
 							/>

@@ -6,10 +6,11 @@ import { updateProfile, uploadImage } from "../services/user.service";
 import { useTranslation } from "react-i18next";
 
 export default function Profile() {
+	const { t } = useTranslation();
 	const { updatePartialUser, user } = useAuth();
+
 	const [editing, setEditing] = useState(false);
 	const [profile, setProfile] = useState(user?.user || null);
-	const { t } = useTranslation();
 
 	const defaultUserAvatar = "https://ui-avatars.com/api/?name=User"; // for normal users/volunteers/donors
 	const defaultNGOAvatar =

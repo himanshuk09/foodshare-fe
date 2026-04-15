@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 export default function NotFound() {
 	const navigate = useNavigate();
 	const { t } = useTranslation();
+
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
 			<div className="bg-white rounded-2xl shadow-xl p-12 text-center max-w-md w-full">

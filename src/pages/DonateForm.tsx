@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Upload } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useLoading } from "../context/LoadingContext";
-import { getAllUser, uploadImage } from "../services/user.service";
-import { createPost } from "../services/post.service";
-import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../context/AuthContext";
+import { createPost } from "../services/post.service";
+import { useLoading } from "../context/LoadingContext";
+import { getAllUserByRole, uploadImage } from "../services/user.service";
 
 export default function DonateForm() {
 	const [postData, setPostData] = useState<any>({
@@ -22,12 +22,13 @@ export default function DonateForm() {
 		expireTime: "",
 	});
 
+	const { user } = useAuth();
+	const { t } = useTranslation();
+	const { setLoading } = useLoading();
+
+	const [ngos, setNGOs] = useState<any>([]);
 	const [previewImage, setPreviewImage] = useState<string>("");
 	const [locationFetched, setLocationFetched] = useState(false);
-	const [ngos, setNGOs] = useState<any>([]);
-	const { user } = useAuth();
-	const { setLoading } = useLoading();
-	const { t } = useTranslation();
 
 	const fetchLocation = async () => {
 		navigator.geolocation.getCurrentPosition(
@@ -81,10 +82,6 @@ export default function DonateForm() {
 			},
 		);
 	};
-
-	useEffect(() => {
-		fetchLocation();
-	}, []);
 
 	const handleImageUpload = (e: any) => {
 		const file = e.target.files[0];
@@ -160,7 +157,7 @@ export default function DonateForm() {
 	const fetchNGOs = async () => {
 		try {
 			setLoading(true);
-			const response = await getAllUser("ngo");
+			const response = await getAllUserByRole("ngo");
 			setNGOs(response);
 		} catch {
 			console.error("unable to get NGOs");
@@ -171,6 +168,7 @@ export default function DonateForm() {
 
 	useEffect(() => {
 		fetchNGOs();
+		fetchLocation();
 	}, []);
 
 	if (user?.user?.role !== "donor") {

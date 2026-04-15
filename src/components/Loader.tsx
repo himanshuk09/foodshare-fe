@@ -1,9 +1,11 @@
 import React from "react";
-import { useLoading } from "../context/LoadingContext";
 import { useTranslation } from "react-i18next";
+import { useLoading } from "../context/LoadingContext";
+
 const Loader: React.FC = () => {
-	const { loading } = useLoading();
 	const { t } = useTranslation();
+	const { loading } = useLoading();
+
 	if (!loading) return null;
 
 	return (

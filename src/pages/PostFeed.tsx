@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MapPin, Package, Users, Locate, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useEffect, useState } from "react";
 import { getAllPost } from "../services/post.service";
+import { MapPin, Package, Users, Locate, X } from "lucide-react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import { useTranslation } from "react-i18next";
 
 export default function PostFeed() {
-	const [posts, setPosts] = useState<any>([]);
-	const navigate = useNavigate();
 	const { user } = useAuth();
+	const navigate = useNavigate();
+	const { t } = useTranslation();
+
+	const [, setTick] = useState(0);
+	const [posts, setPosts] = useState<any>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedPost, setSelectedPost] = useState<any>(null);
-	const { t } = useTranslation();
 
 	const fetchPost = async () => {
 		try {
@@ -27,18 +29,6 @@ export default function PostFeed() {
 		}
 	};
 
-	useEffect(() => {
-		fetchPost();
-	}, []);
-	const [, setTick] = useState(0);
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setTick((prev) => prev + 1);
-		}, 1000);
-
-		return () => clearInterval(interval);
-	}, []);
 	const getRemainingTime = (expireTime: string) => {
 		if (!expireTime) return "";
 
@@ -70,6 +60,18 @@ export default function PostFeed() {
 
 		return "bg-black/70 text-white shadow-[0_0_10px_rgba(255,255,255,0.6)]";
 	};
+
+	useEffect(() => {
+		fetchPost();
+	}, []);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setTick((prev) => prev + 1);
+		}, 1000);
+
+		return () => clearInterval(interval);
+	}, []);
 
 	return (
 		<div className="space-y-6">

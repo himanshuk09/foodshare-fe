@@ -1,23 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { MapPin, Package } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { getAllUser } from "../services/user.service";
-import { assignVolenteers, getAllPostBYNGOId } from "../services/post.service";
-import { useLoading } from "../context/LoadingContext";
-import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { MapPin, Package } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { getAllUserByRole } from "../services/user.service";
+import { useLoading } from "../context/LoadingContext";
+import { assignVolenteers, getAllPostBYNGOId } from "../services/post.service";
 
 export default function NGORequests() {
-	const [selectedPost, setSelectedPost] = useState<any>(null);
-	const [selectedVolunteer, setSelectedVolunteer] = useState("");
-	const [volunteers, setVolunteers] = useState<any[]>([]);
-	const [posts, setPosts] = useState<any[]>([]);
-	const [loader, setLoader] = useState(true);
 	const { user } = useAuth();
-	const { setLoading } = useLoading();
 	const { t } = useTranslation();
+	const { setLoading } = useLoading();
+
+	const [loader, setLoader] = useState(true);
+	const [posts, setPosts] = useState<any[]>([]);
+	const [volunteers, setVolunteers] = useState<any[]>([]);
+	const [selectedVolunteer, setSelectedVolunteer] = useState("");
+	const [selectedPost, setSelectedPost] = useState<any>(null);
+
 	// Assign volunteer to a post
 	const assignVolunteer = async () => {
 		if (!selectedPost || !selectedVolunteer) {
@@ -56,7 +58,7 @@ export default function NGORequests() {
 	const fetchVolunteers = async () => {
 		try {
 			setLoading(true);
-			const data = await getAllUser("volunteer");
+			const data = await getAllUserByRole("volunteer");
 			setVolunteers(data || []);
 		} catch (error) {
 			console.error("Unable to fetch volunteers:", error);
@@ -180,15 +182,15 @@ export default function NGORequests() {
 				<div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-40">
 					<div className="bg-white rounded-2xl p-6 max-w-sm w-full">
 						<h3 className="text-xl font-bold text-gray-800 mb-3">
-							Assign Volunteer
+							{t("Assign Volunteer")}
 						</h3>
 						<p className="text-gray-600 mb-3">
-							Donation: {selectedPost?.foodType}
+							{t("Donation")}: {selectedPost?.foodType}
 						</p>
 
 						<div className="space-y-3">
 							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Select Volunteer
+								{t("Select Volunteer")}
 							</label>
 							<select
 								value={selectedVolunteer}
@@ -197,7 +199,9 @@ export default function NGORequests() {
 								}
 								className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm"
 							>
-								<option value="">Choose a volunteer</option>
+								<option value="">
+									{t("Choose a volunteer")}
+								</option>
 								{volunteers.map((vol) => (
 									<option key={vol?._id} value={vol?._id}>
 										{vol?.name} -{" "}
@@ -211,13 +215,13 @@ export default function NGORequests() {
 									onClick={assignVolunteer}
 									className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 text-sm"
 								>
-									Assign
+									{t("Assign")}
 								</button>
 								<button
 									onClick={() => setSelectedPost(null)}
 									className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 text-sm"
 								>
-									Cancel
+									{t("Cancel")}
 								</button>
 							</div>
 						</div>

@@ -8,6 +8,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export default function Register() {
+	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const { setLoading } = useLoading(); //  Loader context
+
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
@@ -19,10 +23,7 @@ export default function Register() {
 	const [otpSent, setOtpSent] = useState(false);
 	const [otpVerified, setOtpVerified] = useState(false);
 	const [errors, setErrors] = useState<any>({});
-	const navigate = useNavigate();
-	const { setLoading } = useLoading(); //  Loader context
 	const [showPassword, setShowPassword] = useState(false);
-	const { t } = useTranslation();
 
 	const handleChange = (e: any) => {
 		const { name, value } = e.target;

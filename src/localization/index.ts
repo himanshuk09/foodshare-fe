@@ -9,7 +9,8 @@ import resources from "./resources";
  *
  * Example:
  * - "en" → English
- * - "de" → German
+ * - "hi" → Hindi
+ * - "mr" → Marathi
  */
 const SUPPORTED_LANGS = ["en", "hi", "mr"] as const;
 
@@ -28,7 +29,8 @@ i18n.use(detector)
 		 * Example:
 		 * {
 		 *   en: { translation: {...} },
-		 *   de: { translation: {...} }
+		 *   hi: { translation: {...} },
+		 *   mr: { translation: {...} }
 		 * }
 		 */
 		resources,

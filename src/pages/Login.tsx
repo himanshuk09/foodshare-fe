@@ -9,13 +9,14 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export default function Login() {
-	const [credentials, setCredentials] = useState({ email: "", password: "" });
 	const { setUser } = useAuth();
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 	const { setLoading } = useLoading(); //  loader hook
+
+	const [credentials, setCredentials] = useState({ email: "", password: "" });
 	const [showPassword, setShowPassword] = useState(false);
 
-	const { t } = useTranslation();
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
