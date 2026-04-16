@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+/* Menu items */
+.apexcharts-menu-item {
+	color: #ffffff !important;
+}
+
+/* Hover effect */
+.apexcharts-menu-item:hover {
+	background: #334155 !important;
+}
+
+.apexcharts-menu {
+	background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+	border-radius: 8px !important;
+	color: #ffffff !important;
+}
+
+/* Menu (hamburger) icon color */
+.apexcharts-menu-icon svg {
+	fill: #ffffff !important; /* change icon color */
+}
+/* Hide SVG option */
+.apexcharts-menu-item.exportSVG {
+	display: none !important;
+}
+
+/* Hide PNG option */
+.apexcharts-menu-item.exportPNG {
+	display: none !important;
+}
+.apexcharts-menu-item.exportCSV {
+	color: #22d3ee !important;
+	font-weight: 500;
+}

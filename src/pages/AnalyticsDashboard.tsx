@@ -204,63 +204,87 @@ export default function AnalyticsDashboard() {
 			</div>
 
 			{/*  Monthly Chart */}
-			<div className="bg-white p-6 rounded-2xl  bg-gradient-to-tr from-green-600 to-blue-600 text-white shadow-xl">
-				<h2 className="text-xl font-bold mb-4">
-					{t("Monthly Donations")}
-				</h2>
+			<div>
+				<div className="bg-white p-6 rounded-2xl  bg-gradient-to-tr from-green-600 to-blue-600 text-white shadow-xl">
+					<h2 className="text-xl font-bold mb-4">
+						{t("Monthly Donations")}
+					</h2>
 
-				<Chart
-					type="bar"
-					height={350}
-					options={{
-						chart: {
-							type: "bar",
-							toolbar: { show: false },
-							background: "transparent",
-						},
-
-						xaxis: {
-							categories: months,
-							labels: {
-								style: { colors: "#ffffff" }, // white text
+					<Chart
+						type="bar"
+						height={350}
+						options={{
+							chart: {
+								type: "bar",
+								background: "transparent",
+								toolbar: {
+									show: true,
+									tools: {
+										download: true, //  enable download
+										selection: false,
+										zoom: false,
+										zoomin: false,
+										zoomout: false,
+										pan: false,
+										reset: false,
+									},
+									export: {
+										csv: {
+											filename: "analytics-data",
+										},
+										svg: {
+											filename: "analytics-chart",
+										},
+										png: {
+											filename: "analytics-chart",
+										},
+									},
+								},
 							},
-						},
 
-						yaxis: {
-							labels: {
-								style: { colors: "#ffffff" },
+							xaxis: {
+								categories: months,
+								labels: {
+									style: { colors: "#ffffff" }, // white text
+								},
 							},
-						},
 
-						grid: {
-							borderColor: "rgba(255,255,255,0.2)",
-						},
-
-						plotOptions: {
-							bar: {
-								borderRadius: 8,
-								columnWidth: "40%",
+							yaxis: {
+								labels: {
+									style: { colors: "#ffffff" },
+								},
 							},
-						},
 
-						dataLabels: {
-							enabled: false,
-						},
+							grid: {
+								borderColor: "rgba(255,255,255,0.2)",
+							},
 
-						//  CLEAN SINGLE COLOR (BEST)
-						colors: ["#ffffff"],
+							plotOptions: {
+								bar: {
+									borderRadius: 8,
+									columnWidth: "40%",
+								},
+							},
 
-						tooltip: {
-							theme: "dark",
-						},
-					}}
-					series={[
-						{
-							name: "Donations",
-							data: monthlyValues,
-						},
-					]}
-				/>
+							dataLabels: {
+								enabled: false,
+							},
+
+							//  CLEAN SINGLE COLOR (BEST)
+							colors: ["#ffffff"],
+
+							tooltip: {
+								theme: "dark",
+							},
+						}}
+						series={[
+							{
+								name: "Donations",
+								data: monthlyValues,
+							},
+						]}
+					/>
+				</div>
 			</div>
 
 			{/*  NGO Pie Chart */}
@@ -278,6 +302,29 @@ export default function AnalyticsDashboard() {
 
 						chart: {
 							background: "transparent",
+							toolbar: {
+								show: true,
+								tools: {
+									download: true, //  enable download
+									selection: false,
+									zoom: false,
+									zoomin: false,
+									zoomout: false,
+									pan: false,
+									reset: false,
+								},
+								export: {
+									csv: {
+										filename: "ngo-data",
+									},
+									svg: {
+										filename: "ngo-chart",
+									},
+									png: {
+										filename: "ngo-chart",
+									},
+								},
+							},
 						},
 
 						legend: {
