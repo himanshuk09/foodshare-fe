@@ -29,7 +29,20 @@
 .apexcharts-menu-item.exportPNG {
 	display: none !important;
 }
-.apexcharts-menu-item.exportCSV {
+.apexcharts-menu-item {
 	color: #22d3ee !important;
 	font-weight: 500;
+}
+
+@keyframes slideInRight {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+.animate-slideInRight {
+	animation: slideInRight 0.3s ease-out;
 }
