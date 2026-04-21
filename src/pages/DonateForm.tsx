@@ -127,7 +127,9 @@ export default function DonateForm() {
 				donorId: user.user?._id,
 				status: "pending",
 				createdAt: new Date().toISOString(),
-				expireTime: new Date(postData.expireTime).toISOString(),
+				...(postData.expireTime && {
+					expireTime: new Date(postData.expireTime).toISOString(),
+				}),
 			};
 
 			await createPost({ ...newPost });
@@ -268,11 +270,14 @@ export default function DonateForm() {
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-700 mb-2">
-							{t("Expiry Time")}
+							{t("Expiry Time")}{" "}
+							<span className="text-gray-400 text-xs">
+								(optional)
+							</span>
 						</label>
 						<input
 							type="datetime-local"
-							value={postData?.expireTime}
+							value={postData?.expireTime || ""}
 							onChange={(e) =>
 								setPostData({
 									...postData,
@@ -281,7 +286,6 @@ export default function DonateForm() {
 							}
 							min={new Date().toISOString().slice(0, 16)}
 							className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-400"
-							required
 						/>
 					</div>
 					<div>
